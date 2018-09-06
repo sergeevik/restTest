@@ -16,6 +16,18 @@
     },
     "schemaBaseUrl": {
       "type": "string"
+    },
+    "requestsFolder": {
+      "type": "string"
+    },
+    "scenariosFolder": {
+      "type": "string"
+    },
+    "requestList": {
+      "$ref": "common.json#definitions/listString"
+    },
+    "scenarioList": {
+      "$ref": "common.json#definitions/listString"
     }
   },
   "additionalProperties": true,

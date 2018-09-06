@@ -4,9 +4,7 @@
     "listString":{
       "type": "array",
       "items": {
-        "property":{
-          "type": "string"
-        }
+        "type": "string"
       }
     },
     "header":{
