@@ -3,6 +3,7 @@ package tester.service;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.apache.log4j.Logger;
 import tester.model.Header;
 import tester.model.Properties;
 import tester.model.QueryParam;
@@ -14,8 +15,10 @@ import java.io.IOException;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 
 public class RequestService {
+    private static final Logger log = Logger.getLogger(RequestService.class);
     private Request request;
     private Properties properties;
+
 
     private RequestService(Request request, Properties properties) {
         this.request = request;
@@ -23,29 +26,50 @@ public class RequestService {
     }
 
     public Response execute() throws IOException {
+        try {
 
-        PropertiesService propertiesService = new PropertiesService(properties);
-        propertiesService.setRestAssuredProperties();
+            log.info("====== START REQUEST: " + request.getRelativeUrl() + " ======");
+            PropertiesService propertiesService = new PropertiesService(properties);
+            propertiesService.setRestAssuredProperties();
 
-        RequestSpecification requestSpecification = RestAssured.given()
-                .log().all()
-                .contentType(request.getContentType())
-                .body(request.getBody());
+            RequestSpecification requestSpecification = RestAssured.given()
+                    .log().all()
+                    .contentType(request.getContentType())
+                    .body(request.getBody());
 
-        fillQueryParam(requestSpecification);
-        fillHeaders(requestSpecification);
-        fillContentType(requestSpecification);
+            fillQueryParam(requestSpecification);
+            fillHeaders(requestSpecification);
+            fillContentType(requestSpecification);
 
-        Response response = executeRequest(requestSpecification);
-        response.prettyPrint();
+            Response response = executeRequest(requestSpecification);
+            System.out.println("Response:");
+            response.prettyPrint();
 
-        String schemaFullPath = getSchemaPath();
+            String schemaFullPath = getSchemaPath();
+            checkResposeEquasSceme(response, schemaFullPath);
+            checkResponseCode(response);
 
+            return response;
+        }catch (AssertionError error){
+            log.warn("====== FAIL REQUEST: " + request.getRelativeUrl() + " ======");
+            System.out.println(error.getMessage());
+            throw error;
+        }finally {
+            log.info("====== END REQUEST: " + request.getRelativeUrl() + " ======");
+        }
+
+    }
+
+    private void checkResponseCode(Response response) {
+        response.then().assertThat()
+                .statusCode(request.getAnswerCode());
+    }
+
+    private void checkResposeEquasSceme(Response response, String schemaFullPath) {
         if (request.isValidateSchema() && response != null){
             response.then().assertThat()
                     .body(matchesJsonSchema(new File(schemaFullPath).toURI()));
         }
-        return response;
     }
 
     private String getSchemaPath() {

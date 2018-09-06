@@ -2,12 +2,14 @@ package tester.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
+import org.apache.log4j.Logger;
 import tester.model.*;
 
 import java.io.IOException;
 import java.util.HashMap;
 
 public class ScenarioService {
+    private static final Logger log = Logger.getLogger(ScenarioService.class);
     private Scenarios scenarios;
     private Properties properties;
     private HashMap<Integer, HashMap<String, Object>> values;
@@ -19,6 +21,7 @@ public class ScenarioService {
     }
 
     public void execute() throws IOException {
+        log.info("============= SCENARIO START =============");
         for (Scenario scenario : scenarios.getScenarios()) {
             Request request = scenario.getRequest();
             if (values != null && !values.isEmpty()){
@@ -43,6 +46,8 @@ public class ScenarioService {
             stepMap.put( "resp", response.jsonPath().get());
             values.put(scenario.getStepId(), stepMap);
         }
+
+        log.info("============= SCENARIO END =============");
     }
 
     /**
@@ -63,11 +68,13 @@ public class ScenarioService {
      * @return
      */
     String parseEL(String text) {
+        log.debug("начинаем парсить строку: " + text);
         int start = text.indexOf("#");
         int end = text.indexOf("#", start+1);
         while (end > start){
             String substring = text.substring(start, end)
                     .replaceAll("#","");
+            log.debug("заменяем: " + substring);
             String[] split = substring.split("\\.");
             int stepId = Integer.parseInt(split[0]);
             HashMap<String, Object> tempMap = values.get(stepId);
@@ -77,6 +84,11 @@ public class ScenarioService {
                     tempMap = (HashMap<String, Object>) value;
                 }else if (value instanceof String && split[i].equals(split[split.length-1])){
                     text = text.replace("#"+substring+"#", value.toString());
+                    log.debug("замена: '" + substring + "' прошла успешно. Новое значение: " + value.toString());
+                }else if (value == null){
+                    log.warn("замена: '" + substring + "' не увенчалась успехом, а жаль. Попробуй посмотреть запрос/ответ" +
+                            "из которого надо было получить это значение. Пришло что-то не то.");
+                    throw new RuntimeException("Text: " +substring + ", not found in cache request/resp. Try find it.");
                 }
             }
             start = text.indexOf("#");
