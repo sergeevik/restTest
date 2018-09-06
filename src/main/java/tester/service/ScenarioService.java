@@ -1,12 +1,11 @@
 package tester.service;
 
-import io.restassured.path.json.JsonPath;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
 import tester.model.*;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 public class ScenarioService {
     private Scenarios scenarios;
@@ -34,7 +33,15 @@ public class ScenarioService {
                                 .withProperties(properties)
                                 .build();
             Response response = requestService.execute();
-            values.put( scenario.getStepId(), response.jsonPath().get());
+
+            HashMap<String, Object> stepMap = values.getOrDefault(scenario.getStepId(), new HashMap<>());
+            if (request.getBody() != null && !request.getBody().isEmpty()) {
+                ObjectMapper mapper = new ObjectMapper();
+                HashMap hashMap = mapper.readValue(request.getBody(), HashMap.class);
+                stepMap.put("req", hashMap);
+            }
+            stepMap.put( "resp", response.jsonPath().get());
+            values.put(scenario.getStepId(), stepMap);
         }
     }
 
