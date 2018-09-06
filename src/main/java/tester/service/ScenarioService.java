@@ -86,7 +86,7 @@ public class ScenarioService {
                     text = text.replace("#"+substring+"#", value.toString());
                     log.debug("замена: '" + substring + "' прошла успешно. Новое значение: " + value.toString());
                 }else if (value == null){
-                    log.warn("замена: '" + substring + "' не увенчалась успехом, а жаль. Попробуй посмотреть запрос/ответ" +
+                    log.warn("замена: '" + substring + "' не увенчалась успехом, а жаль. Попробуй посмотреть запрос/ответ " +
                             "из которого надо было получить это значение. Пришло что-то не то.");
                     throw new RuntimeException("Text: " +substring + ", not found in cache request/resp. Try find it.");
                 }
