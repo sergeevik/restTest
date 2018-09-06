@@ -8,22 +8,48 @@ import tester.service.RequestService;
 import tester.service.ScenarioService;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        //"C:\work\test-rest\properties.json" "C:\work\test-rest\wiki.get.request.json"
-//        String propertiesFile = args[0];
-//        String requestFile = args[1];
-
         String propertiesFile = "C:\\work\\test-rest\\properties.json";
-        String requestFile = "C:\\work\\test-rest\\wiki.get.request.json";
-        String scenarionFile = "C:\\work\\test-rest\\download.scenario.json";
 
-//        req(propertiesFile, requestFile);
-        scenario(propertiesFile, scenarionFile);
+        Properties commonProperties = ParserConfig.getCommonProperties(propertiesFile);
+        List<String> requestsFiles = getAllFile(commonProperties.getRequestsFolder());
+        requestsFiles.addAll(commonProperties.getRequestList());
+
+        List<String> scenarioFiles = getAllFile(commonProperties.getScenariosFolder());
+        scenarioFiles.addAll(commonProperties.getScenarioList());
+
+        for (String requestFile : requestsFiles) {
+            req(propertiesFile, requestFile);
+        }
+        for (String scenarioFile : scenarioFiles) {
+            scenario(propertiesFile, scenarioFile);
+        }
 
 
+    }
+
+    private static List<String> getAllFile(String requestsFolder) throws IOException {
+        if (requestsFolder == null || requestsFolder.isEmpty()){
+            return new ArrayList<>();
+        }
+        try(Stream<Path> pathStream = Files.walk(Paths.get(requestsFolder))){
+            return pathStream
+                    .filter(Files::isRegularFile)
+                    .map(Path::toAbsolutePath)
+                    .map(Path::toString)
+                    .collect(toList());
+        }
     }
 
     private static void scenario(String propertiesFile, String requestFile) throws IOException {
