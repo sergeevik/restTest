@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "scenarios": {
+      "type": "array",
+      "title": "Список UI сообщений",
+      "items": {
+        "$ref": "common.json#definitions/scenario"
+      },
+      "additionalItems": false
+    }
+  }
+}

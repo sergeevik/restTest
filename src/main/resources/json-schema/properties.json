@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "baseUrl": {
+      "type": "string"
+    },
+    "port": {
+      "type": "integer"
+    },
+    "auth": {
+      "$ref": "common.json#definitions/auth"
+    },
+    "content-type": {
+      "type": "string"
+    },
+    "schemaBaseUrl": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true,
+  "required": ["baseUrl"]
+}
