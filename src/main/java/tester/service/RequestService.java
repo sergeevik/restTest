@@ -20,7 +20,7 @@ public class RequestService {
     private Properties properties;
 
 
-    private RequestService(Request request, Properties properties) {
+    public RequestService(Request request, Properties properties) {
         this.request = request;
         this.properties = properties;
     }
@@ -110,29 +110,4 @@ public class RequestService {
         }
     }
 
-    public final static class RequestServiceBuilder {
-        private Request request;
-        private Properties properties;
-
-        private RequestServiceBuilder() {
-        }
-
-        public static RequestServiceBuilder builder() {
-            return new RequestServiceBuilder();
-        }
-
-        public RequestServiceBuilder withRequest(Request request) {
-            this.request = request;
-            return this;
-        }
-
-        public RequestServiceBuilder withProperties(Properties properties) {
-            this.properties = properties;
-            return this;
-        }
-
-        public RequestService build() {
-            return new RequestService(request, properties);
-        }
-    }
 }

@@ -31,10 +31,7 @@ public class ScenarioService {
                     param.setValue( parseEL(param.getValue()) );
                 }
             }
-            RequestService requestService = RequestService.RequestServiceBuilder.builder()
-                                .withRequest(request)
-                                .withProperties(properties)
-                                .build();
+            RequestService requestService = new RequestService(request, properties);
             Response response = requestService.execute();
 
             HashMap<String, Object> stepMap = values.getOrDefault(scenario.getStepId(), new HashMap<>());

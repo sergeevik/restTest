@@ -30,10 +30,10 @@ public class Main {
         scenarioFiles.addAll(commonProperties.getScenarioList());
 
         for (String requestFile : requestsFiles) {
-            req(propertiesFile, requestFile);
+            req(commonProperties, requestFile);
         }
         for (String scenarioFile : scenarioFiles) {
-            scenario(propertiesFile, scenarioFile);
+            scenario(commonProperties, scenarioFile);
         }
 
 
@@ -52,20 +52,15 @@ public class Main {
         }
     }
 
-    private static void scenario(String propertiesFile, String requestFile) throws IOException {
+    private static void scenario(Properties properties, String requestFile) throws IOException {
         Scenarios scenario = ParserConfig.getScenariosSortByID(requestFile);
-        Properties commonProperties = ParserConfig.getCommonProperties(propertiesFile);
-        ScenarioService scenarioService = new ScenarioService(scenario, commonProperties);
+        ScenarioService scenarioService = new ScenarioService(scenario, properties);
         scenarioService.execute();
     }
 
-    private static void req(String propertiesFile, String requestFile) throws IOException {
+    private static void req(Properties properties, String requestFile) throws IOException {
         Request request = ParserConfig.getRequest(requestFile);
-        Properties commonProperties = ParserConfig.getCommonProperties(propertiesFile);
-        RequestService requestService = RequestService.RequestServiceBuilder.builder()
-                .withRequest(request)
-                .withProperties(commonProperties)
-                .build();
+        RequestService requestService = new RequestService(request, properties);
         requestService.execute();
     }
 }
