@@ -3,12 +3,10 @@ package tester.service;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.log4j.Logger;
-import tester.model.Header;
-import tester.model.Properties;
-import tester.model.QueryParam;
-import tester.model.Request;
+import tester.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -20,6 +18,7 @@ import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 public class RequestService {
     private static final Logger log = Logger.getLogger(RequestService.class);
     private Request request;
+    private ResponseValidator responseValidator;
     private Properties properties;
     private PrintStream printStream;
     private ByteArrayOutputStream out;
@@ -27,6 +26,7 @@ public class RequestService {
 
     public RequestService(Request request, Properties properties) {
         this.request = request;
+        this.responseValidator = request.getResponseValidator();
         this.properties = properties;
         out = new ByteArrayOutputStream();
         printStream = new PrintStream(out);
@@ -55,6 +55,7 @@ public class RequestService {
             String schemaFullPath = getSchemaPath();
             checkResposeEquasSceme(response, schemaFullPath);
             checkResponseCode(response);
+            checkResponseHeaders(response);
             return response;
         }catch (AssertionError error){
             log.warn("====== FAIL REQUEST: " + request.getRelativeUrl() + " ======");
@@ -70,19 +71,25 @@ public class RequestService {
         response.then().assertThat()
                 .statusCode(request.getAnswerCode());
     }
+    private void checkResponseHeaders(Response response) {
+        ValidatableResponse validatableResponse = response.then().assertThat();
+        for (Header header : responseValidator.getHeaders()) {
+            validatableResponse.header(header.getKey(), header.getValue());
+        }
+    }
 
     private void checkResposeEquasSceme(Response response, String schemaFullPath) {
-        if (request.isValidateSchema() && response != null){
+        if (responseValidator.isValidateSchema() && response != null){
             response.then().assertThat()
                     .body(matchesJsonSchema(new File(schemaFullPath).toURI()));
         }
     }
 
     private String getSchemaPath() {
-        if (!request.getSchemaFullPath().isEmpty()){
-            return request.getSchemaFullPath();
+        if (!responseValidator.getSchemaFullPath().isEmpty()){
+            return responseValidator.getSchemaFullPath();
         }else {
-            return properties.getSchemaBaseUrl() + request.getSchemaRelativePath();
+            return properties.getSchemaBaseUrl() + responseValidator.getSchemaRelativePath();
         }
     }
 

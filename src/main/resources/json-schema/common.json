@@ -43,6 +43,38 @@
       },
       "additionalProperties": false
     },
+    "responseValidator":{
+      "type": "object",
+      "properties": {
+        "schemaRelativePath": {
+          "type": "string",
+          "default": ""
+        },
+        "schemaFullPath": {
+          "type": "string",
+          "default": ""
+        },
+        "validateSchema": {
+          "type": "boolean",
+          "default": true
+        },
+        "headers": {
+          "type": "array",
+          "items": {
+            "$ref": "#definitions/header"
+          },
+          "additionalItems": false
+        },
+        "content-type": {
+          "type": "string",
+          "default": ""
+        },
+        "answerCode": {
+          "type": "integer",
+          "default": 200
+        }
+      }
+    },
     "request": {
       "type": "object",
       "properties": {
@@ -60,17 +92,8 @@
           ],
           "default": "GET"
         },
-        "schemaRelativePath": {
-          "type": "string",
-          "default": ""
-        },
-        "schemaFullPath": {
-          "type": "string",
-          "default": ""
-        },
-        "validateSchema": {
-          "type": "boolean",
-          "default": true
+        "responseValidator":{
+          "$ref": "#definitions/responseValidator"
         },
         "headers": {
           "type": "array",
