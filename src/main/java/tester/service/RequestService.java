@@ -1,6 +1,7 @@
 package tester.service;
 
 import io.restassured.RestAssured;
+import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.log4j.Logger;
@@ -9,8 +10,10 @@ import tester.model.Properties;
 import tester.model.QueryParam;
 import tester.model.Request;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 
@@ -18,11 +21,15 @@ public class RequestService {
     private static final Logger log = Logger.getLogger(RequestService.class);
     private Request request;
     private Properties properties;
+    private PrintStream printStream;
+    private ByteArrayOutputStream out;
 
 
     public RequestService(Request request, Properties properties) {
         this.request = request;
         this.properties = properties;
+        out = new ByteArrayOutputStream();
+        printStream = new PrintStream(out);
     }
 
     public Response execute() throws IOException {
@@ -33,7 +40,7 @@ public class RequestService {
             propertiesService.setRestAssuredProperties();
 
             RequestSpecification requestSpecification = RestAssured.given()
-                    .log().all()
+                    .log().all().filter(RequestLoggingFilter.logRequestTo(printStream))
                     .contentType(request.getContentType())
                     .body(request.getBody());
 
@@ -42,17 +49,16 @@ public class RequestService {
             fillContentType(requestSpecification);
 
             Response response = executeRequest(requestSpecification);
-            System.out.println("Response:");
-            response.prettyPrint();
+            log.info(out.toString());
+            log.info("Response: \n" + response.prettyPrint());
 
             String schemaFullPath = getSchemaPath();
             checkResposeEquasSceme(response, schemaFullPath);
             checkResponseCode(response);
-
             return response;
         }catch (AssertionError error){
             log.warn("====== FAIL REQUEST: " + request.getRelativeUrl() + " ======");
-            System.out.println(error.getMessage());
+            log.warn(error.getMessage());
             throw error;
         }finally {
             log.info("====== END REQUEST: " + request.getRelativeUrl() + " ======");
