@@ -24,15 +24,7 @@ public class ScenarioService {
         log.info("============= SCENARIO START =============");
         for (Scenario scenario : scenarios.getScenarios()) {
             Request request = scenario.getRequest();
-            if (values != null && !values.isEmpty()){
-                request.setRelativeUrl( parseEL(request.getRelativeUrl()) );
-                request.setBody( parseEL(request.getBody()) );
-                for (QueryParam param : request.getQueryParams()) {
-                    param.setValue( parseEL(param.getValue()) );
-                }
-            }
-            RequestService requestService = new RequestService(request, properties);
-            Response response = requestService.execute();
+            Response response = executeWithRepeatable(scenario);
 
             HashMap<String, Object> stepMap = values.getOrDefault(scenario.getStepId(), new HashMap<>());
             if (request.getBody() != null && !request.getBody().isEmpty()) {
@@ -45,6 +37,44 @@ public class ScenarioService {
         }
 
         log.info("============= SCENARIO END =============");
+    }
+
+    private Response executeWithRepeatable(Scenario scenario) throws IOException {
+        Request request = scenario.getRequest();
+        Response response;
+        if (scenario.getRepeatable() == null){
+            response = executeRequest(request);
+        }else {
+            Repeatable repeatable = scenario.getRepeatable();
+            String actualValue;
+            int countRepeat = 0;
+            do {
+                response = executeRequest(request);
+                actualValue = parseELInAnswer(repeatable.getKey(), response.jsonPath().get());
+                if (countRepeat++ > repeatable.getMaxRepeatCount()){
+                    break;
+                }
+            } while (actualValue.equals(repeatable.getValue()) != repeatable.isEqual());
+            if (countRepeat >= repeatable.getMaxRepeatCount() &&
+                    actualValue.equals(repeatable.getValue()) != repeatable.isEqual()){
+                log.info("Запрос " + request.getRelativeUrl() + " повторился " + countRepeat + " раз. Но" +
+                        " ожидаемый результат не получен. Ожидался результат\n" +
+                        "--- " + actualValue + " будет равно(" + repeatable.isEqual() + ") " + repeatable.getValue());
+            }
+        }
+        return response;
+    }
+
+    private Response executeRequest(Request request) throws IOException {
+        if (values != null && !values.isEmpty()){
+            request.setRelativeUrl( parseEL(request.getRelativeUrl()) );
+            request.setBody( parseEL(request.getBody()) );
+            for (QueryParam param : request.getQueryParams()) {
+                param.setValue( parseEL(param.getValue()) );
+            }
+        }
+        RequestService requestService = new RequestService(request, properties);
+        return requestService.execute();
     }
 
     /**
@@ -93,5 +123,36 @@ public class ScenarioService {
         }
         return text;
     }
+
+    String parseELInAnswer(String text, HashMap<String, Object> answer) {
+        log.debug("начинаем парсить строку: " + text);
+        int start = text.indexOf("#");
+        int end = text.indexOf("#", start+1);
+        while (end > start){
+            String substring = text.substring(start, end)
+                    .replaceAll("#","");
+            log.debug("заменяем: " + substring);
+            String[] split = substring.split("\\.");
+            HashMap<String, Object> tempMap = answer;
+            for (int i = 0; i < split.length; i++) {
+                Object value = tempMap.get(split[i]);
+                if (value instanceof HashMap) {
+                    tempMap = (HashMap<String, Object>) value;
+                }else if (value instanceof String && split[i].equals(split[split.length-1])){
+                    text = text.replace("#"+substring+"#", value.toString());
+                    log.debug("замена: '" + substring + "' прошла успешно. Новое значение: " + value.toString());
+                }else if (value == null){
+                    log.warn("замена: '" + substring + "' не увенчалась успехом, а жаль. Попробуй посмотреть запрос/ответ " +
+                            "из которого надо было получить это значение. Пришло что-то не то.");
+                    throw new RuntimeException("Text: " +substring + ", not found in cache request/resp. Try find it.");
+                }
+            }
+            start = text.indexOf("#");
+            end = text.indexOf("#", start+1);
+        }
+        return text;
+    }
+
+
 
 }

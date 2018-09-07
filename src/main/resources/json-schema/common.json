@@ -132,6 +132,24 @@
         },
         "request": {
           "$ref": "#definitions/request"
+        },
+        "repeatable":{
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "equal": {
+              "type": "boolean"
+            },
+            "value": {
+              "type": "string"
+            },
+            "maxRepeatCount":{
+              "type": "integer",
+              "default": 2147483647
+            }
+          }
         }
       },
       "additionalProperties": true,
