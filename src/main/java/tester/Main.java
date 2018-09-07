@@ -8,6 +8,7 @@ import tester.model.Properties;
 import tester.model.Request;
 import tester.model.Scenarios;
 import tester.service.ParserConfig;
+import tester.service.PropertiesService;
 import tester.service.RequestService;
 import tester.service.ScenarioService;
 
@@ -27,9 +28,11 @@ import static java.util.stream.Collectors.toList;
 public class Main {
     public static void main(String[] args) throws IOException {
         String propertiesFile = "C:\\work\\test-rest\\properties.json";
-        logAppender();
 
         Properties commonProperties = ParserConfig.getCommonProperties(propertiesFile);
+        PropertiesService propertiesService = new PropertiesService(commonProperties);
+        propertiesService.addLogAppender();
+
         List<String> requestsFiles = getAllFile(commonProperties.getRequestsFolder());
         requestsFiles.addAll(commonProperties.getRequestList());
 
@@ -69,18 +72,5 @@ public class Main {
         Request request = ParserConfig.getRequest(requestFile);
         RequestService requestService = new RequestService(request, properties);
         requestService.execute();
-    }
-
-    private static void logAppender(){
-        FileAppender fileAppender = new FileAppender();
-        fileAppender.setName("log");
-        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy/hh.mm.ss");
-        String fileName = "./logs/" + format.format(new Date()) + ".log";
-        fileAppender.setFile(fileName);
-        fileAppender.setThreshold(Level.INFO);
-        fileAppender.setAppend(true);
-        fileAppender.setLayout(new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"));
-        fileAppender.activateOptions();
-        Logger.getRootLogger().addAppender(fileAppender);
     }
 }

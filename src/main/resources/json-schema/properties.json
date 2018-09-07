@@ -28,6 +28,18 @@
     },
     "scenarioList": {
       "$ref": "common.json#definitions/listString"
+    },
+    "fullPathToLogFile":{
+      "type": "string"
+    },
+    "logLevel":{
+      "type": "string",
+      "enum": [
+        "INFO",
+        "DEBUG",
+        "WARN"
+      ],
+      "default": "INFO"
     }
   },
   "additionalProperties": true,
