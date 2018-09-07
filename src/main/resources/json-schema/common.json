@@ -23,12 +23,15 @@
       "type": "object",
       "properties": {
         "login": {
-          "type": "string"
+          "type": "string",
+          "description": "логин"
         },
         "password": {
-          "type": "string"
+          "type": "string",
+          "description": "пароль"
         }
       },
+      "description": "параметры авторизации",
       "additionalProperties": false
     },
     "queryParam": {

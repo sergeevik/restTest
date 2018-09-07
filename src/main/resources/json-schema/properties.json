@@ -3,34 +3,43 @@
   "type": "object",
   "properties": {
     "baseUrl": {
-      "type": "string"
+      "type": "string",
+      "description": "базовый url для всех запросов"
     },
     "port": {
-      "type": "integer"
+      "type": "integer",
+      "description": "port для всех запросов"
     },
     "auth": {
       "$ref": "common.json#definitions/auth"
     },
     "content-type": {
-      "type": "string"
+      "type": "string",
+      "description": "тип контента"
     },
     "schemaBaseUrl": {
-      "type": "string"
+      "type": "string",
+      "description": "адрес схем"
     },
     "requestsFolder": {
-      "type": "string"
+      "type": "string",
+      "description": "каталог запросов"
     },
     "scenariosFolder": {
-      "type": "string"
+      "type": "string",
+      "description": "каталог сценариев"
     },
     "requestList": {
-      "$ref": "common.json#definitions/listString"
+      "$ref": "common.json#definitions/listString",
+      "description": "список запросов"
     },
     "scenarioList": {
-      "$ref": "common.json#definitions/listString"
+      "$ref": "common.json#definitions/listString",
+      "description": "список сценариев"
     },
     "fullPathToLogFile":{
-      "type": "string"
+      "type": "string",
+      "description": "путь к логам"
     },
     "logLevel":{
       "type": "string",
@@ -39,7 +48,8 @@
         "DEBUG",
         "WARN"
       ],
-      "default": "INFO"
+      "default": "INFO",
+      "description": "уровень логов"
     }
   },
   "additionalProperties": true,
