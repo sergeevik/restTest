@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -21,7 +22,14 @@ import static java.util.stream.Collectors.toList;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        String propertiesFile = "C:\\work\\test-rest\\properties.json";
+        String propertiesFile;
+        if (args.length < 1 || args[0] == null || args[0].isEmpty()){
+            System.out.println("path to property file:");
+            Scanner scanner = new Scanner(System.in);
+            propertiesFile = scanner.nextLine();
+        }else {
+            propertiesFile = args[0];
+        }
 
         Properties commonProperties = ParserConfig.getCommonProperties(propertiesFile);
         PropertiesService propertiesService = new PropertiesService(commonProperties);

@@ -133,7 +133,7 @@
         "request": {
           "$ref": "#definitions/request"
         },
-        "repeatable":{
+        "repeatableWhile":{
           "type": "object",
           "properties": {
             "key": {
@@ -148,6 +148,10 @@
             "maxRepeatCount":{
               "type": "integer",
               "default": 2147483647
+            },
+            "sleep":{
+              "type": "integer",
+              "default": 0
             }
           }
         }

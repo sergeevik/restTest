@@ -42,10 +42,10 @@ public class ScenarioService {
     private Response executeWithRepeatable(Scenario scenario) throws IOException {
         Request request = scenario.getRequest();
         Response response;
-        if (scenario.getRepeatable() == null){
+        if (scenario.getRepeatableWhile() == null){
             response = executeRequest(request);
         }else {
-            Repeatable repeatable = scenario.getRepeatable();
+            RepeatableWhile repeatable = scenario.getRepeatableWhile();
             String actualValue;
             int countRepeat = 0;
             do {
@@ -53,6 +53,13 @@ public class ScenarioService {
                 actualValue = parseELInAnswer(repeatable.getKey(), response.jsonPath().get());
                 if (countRepeat++ > repeatable.getMaxRepeatCount()){
                     break;
+                }
+                try{
+                    log.info("sleep: " + repeatable.getSleep() + "ms.");
+                    Thread.sleep(repeatable.getSleep());
+                } catch (InterruptedException e) {
+                    log.info("sleep interrupted.");
+                    log.warn(e.getMessage(), e);
                 }
             } while (actualValue.equals(repeatable.getValue()) != repeatable.isEqual());
             if (countRepeat >= repeatable.getMaxRepeatCount() &&
