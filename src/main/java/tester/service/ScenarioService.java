@@ -2,6 +2,8 @@ package tester.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import tester.model.*;
 
@@ -74,10 +76,10 @@ public class ScenarioService {
 
     private Response executeRequest(Request request) throws IOException {
         if (values != null && !values.isEmpty()){
-            request.setRelativeUrl( parseEL(request.getRelativeUrl()) );
-            request.setBody( parseEL(request.getBody()) );
+            request.setRelativeUrl( parseELByStepId(request.getRelativeUrl()) );
+            request.setBody( parseELByStepId(request.getBody()) );
             for (QueryParam param : request.getQueryParams()) {
-                param.setValue( parseEL(param.getValue()) );
+                param.setValue( parseELByStepId(param.getValue()) );
             }
         }
         RequestService requestService = new RequestService(request, properties);
@@ -101,64 +103,59 @@ public class ScenarioService {
      * @param text
      * @return
      */
-    String parseEL(String text) {
+    String parseELByStepId(String text) {
         if (text == null || text.isEmpty()){
             return text;
         }
         log.debug("начинаем парсить строку: " + text);
-        int start = text.indexOf("#");
-        int end = text.indexOf("#", start+1);
-        while (end > start){
-            String substring = text.substring(start, end)
-                    .replaceAll("#","");
-            log.debug("заменяем: " + substring);
-            String[] split = substring.split("\\.");
+        String[] strings = StringUtils.substringsBetween(text, "#", "#");
+        for (String string : strings) {
+            String[] split = string.split("\\.");
             int stepId = Integer.parseInt(split[0]);
             HashMap<String, Object> tempMap = values.get(stepId);
-            for (int i = 1; i < split.length; i++) {
-                Object value = tempMap.get(split[i]);
-                if (value instanceof HashMap) {
-                    tempMap = (HashMap<String, Object>) value;
-                }else if (value instanceof String && split[i].equals(split[split.length-1])){
-                    text = text.replace("#"+substring+"#", value.toString());
-                    log.debug("замена: '" + substring + "' прошла успешно. Новое значение: " + value.toString());
-                }else if (value == null){
-                    log.warn("замена: '" + substring + "' не увенчалась успехом, а жаль. Попробуй посмотреть запрос/ответ " +
-                            "из которого надо было получить это значение. Пришло что-то не то.");
-                    throw new RuntimeException("Text: " +substring + ", not found in cache request/resp. Try find it.");
-                }
+            String[] subarray = ArrayUtils.subarray(split, 1, split.length);
+            try {
+                String value = parseEl(subarray, tempMap);
+                 text = text.replace("#"+string+"#", value);
+                log.info("Успешно заменено: '" + string + "' на '" + value + "'" );
+            }catch (IllegalArgumentException ex){
+                log.warn("Не удалось распарсить выражение: '" + string + "', в тексте: '"+ text + "'");
+                throw ex;
             }
-            start = text.indexOf("#");
-            end = text.indexOf("#", start+1);
         }
         return text;
     }
 
+    private String parseEl(String[] text, HashMap<String, Object> map){
+        for (String key : text) {
+            Object value = map.get(key);
+            if (value instanceof String){
+                return (String) value;
+            }else if (value instanceof HashMap){
+                map = (HashMap<String, Object>) value;
+            }else {
+                throw new IllegalArgumentException("Ошибка парсинга выражения: " + text);
+            }
+        }
+        throw new IllegalArgumentException("Ошибка парсинга выражения: " + text);
+    }
+
+
+
     String parseELInAnswer(String text, HashMap<String, Object> answer) {
         log.debug("начинаем парсить строку: " + text);
-        int start = text.indexOf("#");
-        int end = text.indexOf("#", start+1);
-        while (end > start){
-            String substring = text.substring(start, end)
-                    .replaceAll("#","");
-            log.debug("заменяем: " + substring);
-            String[] split = substring.split("\\.");
-            HashMap<String, Object> tempMap = answer;
-            for (int i = 0; i < split.length; i++) {
-                Object value = tempMap.get(split[i]);
-                if (value instanceof HashMap) {
-                    tempMap = (HashMap<String, Object>) value;
-                }else if (value instanceof String && split[i].equals(split[split.length-1])){
-                    text = text.replace("#"+substring+"#", value.toString());
-                    log.debug("замена: '" + substring + "' прошла успешно. Новое значение: " + value.toString());
-                }else if (value == null){
-                    log.warn("замена: '" + substring + "' не увенчалась успехом, а жаль. Попробуй посмотреть запрос/ответ " +
-                            "из которого надо было получить это значение. Пришло что-то не то.");
-                    throw new RuntimeException("Text: " +substring + ", not found in cache request/resp. Try find it.");
-                }
+        String[] strings = StringUtils.substringsBetween(text, "#", "#");
+        for (String string : strings) {
+            try {
+                String[] split = string.split("\\.");
+                String value = parseEl(split, answer);
+                text = text.replace("#"+string+"#", value);
+                log.debug("замена: '" + string + "' прошла успешно. Новое значение: " + value);
+            }catch (IllegalArgumentException ex){
+                log.warn("замена: '" + string + "' не увенчалась успехом, а жаль. Попробуй посмотреть запрос/ответ " +
+                        "из которого надо было получить это значение. Пришло что-то не то.");
+                throw ex;
             }
-            start = text.indexOf("#");
-            end = text.indexOf("#", start+1);
         }
         return text;
     }

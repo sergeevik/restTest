@@ -26,10 +26,10 @@ public class ScenarioServiceTest {
         FieldUtils.writeDeclaredField(scenarioService, "values", values, true);
 
 
-        String easy = scenarioService.parseEL("#1.operation.valueT# parse operation id = #1.operation.id#");
+        String easy = scenarioService.parseELByStepId("#1.operation.valueT# parse operation id = #1.operation.id#");
         assertEquals(EXPECTED_EASY, easy);
 
-        String hard = scenarioService.parseEL("#1.operation.valueT##1.operation.id#");
+        String hard = scenarioService.parseELByStepId("#1.operation.valueT##1.operation.id#");
         assertEquals(EXPECTED_HARD, hard);
 
 
