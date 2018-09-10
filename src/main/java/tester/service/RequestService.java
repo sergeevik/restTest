@@ -32,7 +32,7 @@ public class RequestService {
         printStream = new PrintStream(out);
     }
 
-    public Response execute() throws IOException {
+    public Response execute() {
         try {
 
             log.info("====== START REQUEST: " + request.getRelativeUrl() + " ======");
@@ -41,8 +41,11 @@ public class RequestService {
 
             RequestSpecification requestSpecification = RestAssured.given()
                     .log().all().filter(RequestLoggingFilter.logRequestTo(printStream))
-                    .contentType(request.getContentType())
-                    .body(request.getBody());
+                    .contentType(request.getContentType());
+
+            if (request.getBody() != null){
+                requestSpecification.body(request.getBody());
+            }
 
             fillQueryParam(requestSpecification);
             fillHeaders(requestSpecification);
@@ -104,6 +107,8 @@ public class RequestService {
     private void fillContentType(RequestSpecification requestSpecification) {
         if (!request.getContentType().isEmpty()){
             requestSpecification.contentType(request.getContentType());
+        }else if(!properties.getContentType().isEmpty()){
+            requestSpecification.contentType(properties.getContentType());
         }
     }
 

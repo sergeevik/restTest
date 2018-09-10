@@ -20,7 +20,9 @@ public class PropertiesService {
 
     public void setRestAssuredProperties(){
         RestAssured.baseURI = properties.getBaseUrl();
-        RestAssured.port = properties.getPort();
+        if (properties.getPort() > 0) {
+            RestAssured.port = properties.getPort();
+        }
         Auth auth = properties.getAuth();
         if (auth != null) {
             RestAssured.authentication = RestAssured.preemptive().basic(auth.getLogin(), auth.getPassword());

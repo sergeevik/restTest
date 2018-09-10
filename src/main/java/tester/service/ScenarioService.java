@@ -95,6 +95,9 @@ public class ScenarioService {
      * @return
      */
     String parseEL(String text) {
+        if (text == null || text.isEmpty()){
+            return text;
+        }
         log.debug("начинаем парсить строку: " + text);
         int start = text.indexOf("#");
         int end = text.indexOf("#", start+1);
