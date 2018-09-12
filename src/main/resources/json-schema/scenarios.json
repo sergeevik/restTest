@@ -9,6 +9,10 @@
         "$ref": "common.json#definitions/scenario"
       },
       "additionalItems": false
+    },
+    "name":{
+      "type": "string",
+      "default": "unnamed scenarios"
     }
   }
 }

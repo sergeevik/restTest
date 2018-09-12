@@ -110,6 +110,9 @@ public class ScenarioService {
         }
         log.debug("начинаем парсить строку: " + text);
         String[] strings = StringUtils.substringsBetween(text, "#", "#");
+        if (strings == null){
+            return text;
+        }
         for (String string : strings) {
             String[] split = string.split("\\.");
             int stepId = Integer.parseInt(split[0]);
@@ -146,6 +149,9 @@ public class ScenarioService {
     String parseELInAnswer(String text, HashMap<String, Object> answer) {
         log.debug("начинаем парсить строку: " + text);
         String[] strings = StringUtils.substringsBetween(text, "#", "#");
+        if (strings == null){
+            return text;
+        }
         for (String string : strings) {
             try {
                 String[] split = string.split("\\.");

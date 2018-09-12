@@ -6,11 +6,11 @@ import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.log4j.Logger;
+import tester.exeption.ExecuteFail;
 import tester.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
@@ -63,7 +63,7 @@ public class RequestService {
         }catch (AssertionError error){
             log.warn("====== FAIL REQUEST: " + request.getRelativeUrl() + " ======");
             log.warn(error.getMessage());
-            throw error;
+            throw new ExecuteFail(request.getRelativeUrl());
         }finally {
             log.info("====== END REQUEST: " + request.getRelativeUrl() + " ======");
         }

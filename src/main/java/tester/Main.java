@@ -1,12 +1,10 @@
 package tester;
 
+import tester.exeption.ExecuteFail;
 import tester.model.Properties;
 import tester.model.Request;
 import tester.model.Scenarios;
-import tester.service.ParserConfig;
-import tester.service.PropertiesService;
-import tester.service.RequestService;
-import tester.service.ScenarioService;
+import tester.service.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,6 +19,8 @@ import static java.util.stream.Collectors.toList;
 
 
 public class Main {
+    private static ResultLogger requestLogger = new ResultLogger();
+    private static ResultLogger scenarioLogger = new ResultLogger();
     public static void main(String[] args) throws IOException {
         String propertiesFile;
         if (args.length < 1 || args[0] == null || args[0].isEmpty()){
@@ -47,6 +47,8 @@ public class Main {
         for (String scenarioFile : scenarioFiles) {
             scenario(commonProperties, scenarioFile);
         }
+        requestLogger.printResultToLog("Requests");
+        scenarioLogger.printResultToLog("Scenarios");
 
 
     }
@@ -64,15 +66,25 @@ public class Main {
         }
     }
 
-    private static void scenario(Properties properties, String requestFile) throws IOException {
-        Scenarios scenario = ParserConfig.getScenariosSortByID(requestFile);
+    private static void scenario(Properties properties, String scenarioFile) throws IOException {
+        Scenarios scenario = ParserConfig.getScenariosSortByID(scenarioFile);
         ScenarioService scenarioService = new ScenarioService(scenario, properties);
-        scenarioService.execute();
+        try {
+            scenarioService.execute();
+            scenarioLogger.saveOk(scenarioFile);
+        }catch (ExecuteFail fail){
+            scenarioLogger.saveFail(scenarioFile + ":" + fail.getRequestRelativeUrl());
+        }
     }
 
     private static void req(Properties properties, String requestFile) throws IOException {
         Request request = ParserConfig.getRequest(requestFile);
         RequestService requestService = new RequestService(request, properties);
-        requestService.execute();
+        try {
+            requestService.execute();
+            requestLogger.saveOk(request.getRelativeUrl());
+        }catch (ExecuteFail fail){
+            requestLogger.saveFail(request.getRelativeUrl());
+        }
     }
 }
