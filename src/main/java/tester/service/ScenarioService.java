@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import tester.model.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class ScenarioService {
@@ -41,17 +42,17 @@ public class ScenarioService {
         log.info("============= SCENARIO END =============");
     }
 
-    private Response executeWithRepeatable(Scenario scenario) throws IOException {
+    private Response executeWithRepeatable(Scenario scenario) {
         Request request = scenario.getRequest();
         Response response;
         if (scenario.getRepeatableWhile() == null){
-            response = executeRequest(request);
+            response = executeOnce(request);
         }else {
             RepeatableWhile repeatable = scenario.getRepeatableWhile();
             String actualValue;
             int countRepeat = 0;
             do {
-                response = executeRequest(request);
+                response = executeOnce(request);
                 actualValue = parseELInAnswer(repeatable.getKey(), response.jsonPath().get());
                 if (countRepeat++ > repeatable.getMaxRepeatCount()){
                     break;
@@ -74,7 +75,7 @@ public class ScenarioService {
         return response;
     }
 
-    private Response executeRequest(Request request) throws IOException {
+    private Response executeOnce(Request request) {
         if (values != null && !values.isEmpty()){
             request.setRelativeUrl( parseELByStepId(request.getRelativeUrl()) );
             request.setBody( parseELByStepId(request.getBody()) );
@@ -134,10 +135,10 @@ public class ScenarioService {
             }else if (value instanceof HashMap){
                 map = (HashMap<String, Object>) value;
             }else {
-                throw new IllegalArgumentException("Ошибка парсинга выражения: " + text);
+                throw new IllegalArgumentException("Ошибка парсинга выражения: " + Arrays.toString(text));
             }
         }
-        throw new IllegalArgumentException("Ошибка парсинга выражения: " + text);
+        throw new IllegalArgumentException("Ошибка парсинга выражения: " + Arrays.toString(text));
     }
 
 
