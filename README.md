@@ -8,6 +8,6 @@ TODO:
 - в properties добавить поле resultLogFile куда будет логироваться только результат
 - добавить несколько логеров с разными уровнями записи.
     По итогу хочу получить такую структуру файлов
-    /dd-MM-yyyy/hh-mm-ss/info.log - логи INFO
-    /dd-MM-yyyy/hh-mm-ss/debug.log - логи DEBUG
-    /dd-MM-yyyy/hh-mm-ss/result.log  - логи результата
+    - /dd-MM-yyyy/hh-mm-ss/info.log - логи INFO
+    - /dd-MM-yyyy/hh-mm-ss/debug.log - логи DEBUG
+    - /dd-MM-yyyy/hh-mm-ss/result.log  - логи результата
