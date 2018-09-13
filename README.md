@@ -3,7 +3,7 @@
 TODO:
 - [ ] добавить Expected Result к запросу, чтобы можно было проверить данные в ответе. 
   Есть разница ответ получен и верен по схеме и в ответ получен нужный результат
-- [ ] добавить notExistAction в scenario.repeatebleWhile
+- [ ] добавить notExistAction в scenario.repeatebleWhile и в request.expectedResult
 - [ ] переименовать repeatableWhile в repeatWhile
 - [ ] в properties добавить поле resultLogFile куда будет логироваться только результат
 - [ ] добавить несколько логеров с разными уровнями записи.
