@@ -7,13 +7,12 @@ import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
-public class ScenarioServiceTest {
+public class ElParserTest {
     @Test
-    public void parseEL() throws Exception {
+    public void parseELByStepId() {
         final String EXPECTED_EASY = "test parse operation id = 12345";
         final String EXPECTED_HARD = "test12345";
 
-        ScenarioService scenarioService = new ScenarioService(null, null);
         HashMap<String, Object> operation = new HashMap<>();
         operation.put("id", "12345");
         operation.put("valueT", "test");
@@ -23,13 +22,12 @@ public class ScenarioServiceTest {
 
         HashMap<Integer, HashMap<String, Object>> values = new HashMap<>();
         values.put(1, firstStep);
-        FieldUtils.writeDeclaredField(scenarioService, "values", values, true);
 
-
-        String easy = scenarioService.parseELByStepId("#1.operation.valueT# parse operation id = #1.operation.id#");
+        ElParser elParser = new ElParser();
+        String easy = elParser.parseELByStepId("#1.operation.valueT# parse operation id = #1.operation.id#", values);
         assertEquals(EXPECTED_EASY, easy);
 
-        String hard = scenarioService.parseELByStepId("#1.operation.valueT##1.operation.id#");
+        String hard = elParser.parseELByStepId("#1.operation.valueT##1.operation.id#", values);
         assertEquals(EXPECTED_HARD, hard);
 
 

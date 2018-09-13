@@ -2,13 +2,10 @@ package tester.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import tester.model.*;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class ScenarioService {
@@ -16,11 +13,13 @@ public class ScenarioService {
     private Scenarios scenarios;
     private Properties properties;
     private HashMap<Integer, HashMap<String, Object>> values;
+    private ElParser elParser;
 
     public ScenarioService(Scenarios scenarios, Properties properties) {
         this.scenarios = scenarios;
         this.properties = properties;
         values = new HashMap<>();
+        elParser = new ElParser();
     }
 
     public void execute() throws IOException {
@@ -53,7 +52,7 @@ public class ScenarioService {
             int countRepeat = 0;
             do {
                 response = executeOnce(request);
-                actualValue = parseELInAnswer(repeatable.getKey(), response.jsonPath().get());
+                actualValue = elParser.parseELInAnswer(repeatable.getKey(), response.jsonPath().get());
                 if (countRepeat++ > repeatable.getMaxRepeatCount()){
                     break;
                 }
@@ -77,95 +76,16 @@ public class ScenarioService {
 
     private Response executeOnce(Request request) {
         if (values != null && !values.isEmpty()){
-            request.setRelativeUrl( parseELByStepId(request.getRelativeUrl()) );
-            request.setBody( parseELByStepId(request.getBody()) );
+            request.setRelativeUrl(elParser.parseELByStepId(request.getRelativeUrl(), values) );
+            request.setBody( elParser.parseELByStepId(request.getBody(), values) );
             for (QueryParam param : request.getQueryParams()) {
-                param.setValue( parseELByStepId(param.getValue()) );
+                param.setValue( elParser.parseELByStepId(param.getValue(), values) );
             }
         }
         RequestService requestService = new RequestService(request, properties);
         return requestService.execute();
     }
 
-    /**
-     * метод ищет все слова окруженные # и заменяет их на ведружимое мапы
-     *
-     * пример:
-     *
-     * operation/status?id=#operaton.id#
-     *
-     * В этом случае мы находим #operaton.id#, достаем operaton.id делим по точке получаем 2 слова operaton и id
-     * по порядку идем по мапе прошлого ответа:
-     *  - ищем объект по ключу operaton
-     *  - у него пытаемся получить объект по ключу id
-     *
-     *  Если все хорошо и мы нашли подходящее значение - заменяем его, если нет, ничего не делаем
-     *  TODO: стоит подумать над exception
-     * @param text
-     * @return
-     */
-    String parseELByStepId(String text) {
-        if (text == null || text.isEmpty()){
-            return text;
-        }
-        log.debug("начинаем парсить строку: " + text);
-        String[] strings = StringUtils.substringsBetween(text, "#", "#");
-        if (strings == null){
-            return text;
-        }
-        for (String string : strings) {
-            String[] split = string.split("\\.");
-            int stepId = Integer.parseInt(split[0]);
-            HashMap<String, Object> tempMap = values.get(stepId);
-            String[] subarray = ArrayUtils.subarray(split, 1, split.length);
-            try {
-                String value = parseEl(subarray, tempMap);
-                 text = text.replace("#"+string+"#", value);
-                log.info("Успешно заменено: '" + string + "' на '" + value + "'" );
-            }catch (IllegalArgumentException ex){
-                log.warn("Не удалось распарсить выражение: '" + string + "', в тексте: '"+ text + "'");
-                throw ex;
-            }
-        }
-        return text;
-    }
-
-    private String parseEl(String[] text, HashMap<String, Object> map){
-        for (String key : text) {
-            Object value = map.get(key);
-            if (value instanceof String){
-                return (String) value;
-            }else if (value instanceof HashMap){
-                map = (HashMap<String, Object>) value;
-            }else {
-                throw new IllegalArgumentException("Ошибка парсинга выражения: " + Arrays.toString(text));
-            }
-        }
-        throw new IllegalArgumentException("Ошибка парсинга выражения: " + Arrays.toString(text));
-    }
-
-
-
-    String parseELInAnswer(String text, HashMap<String, Object> answer) {
-        log.debug("начинаем парсить строку: " + text);
-        String[] strings = StringUtils.substringsBetween(text, "#", "#");
-        if (strings == null){
-            return text;
-        }
-        for (String string : strings) {
-            try {
-                String[] split = string.split("\\.");
-                String value = parseEl(split, answer);
-                text = text.replace("#"+string+"#", value);
-                log.debug("замена: '" + string + "' прошла успешно. Новое значение: " + value);
-            }catch (IllegalArgumentException ex){
-                log.warn("замена: '" + string + "' не увенчалась успехом, а жаль. Попробуй посмотреть запрос/ответ " +
-                        "из которого надо было получить это значение. Пришло что-то не то.");
-                throw ex;
-            }
-        }
-        return text;
-    }
 
 
 
