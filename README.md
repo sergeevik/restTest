@@ -11,3 +11,4 @@ TODO:
     - /dd-MM-yyyy/hh-mm-ss/info.log - логи INFO
     - /dd-MM-yyyy/hh-mm-ss/debug.log - логи DEBUG
     - /dd-MM-yyyy/hh-mm-ss/result.log  - логи результата
+- [ ] покрыть код тестами
