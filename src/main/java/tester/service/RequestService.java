@@ -22,12 +22,14 @@ public class RequestService {
     private Properties properties;
     private PrintStream printStream;
     private ByteArrayOutputStream out;
+    private ExpectedResultService expectedResultService;
 
 
     public RequestService(Request request, Properties properties) {
         this.request = request;
         this.responseValidator = request.getResponseValidator();
         this.properties = properties;
+        this.expectedResultService = new ExpectedResultService();
         out = new ByteArrayOutputStream();
         printStream = new PrintStream(out);
     }
@@ -59,6 +61,7 @@ public class RequestService {
             checkResposeEquasSceme(response, schemaFullPath);
             checkResponseCode(response);
             checkResponseHeaders(response);
+            checkResult(response);
             return response;
         }catch (AssertionError error){
             log.warn("====== FAIL REQUEST: " + request.getRelativeUrl() + " ======");
@@ -68,6 +71,15 @@ public class RequestService {
             log.info("====== END REQUEST: " + request.getRelativeUrl() + " ======");
         }
 
+    }
+
+    private void checkResult(Response response) {
+        ExpectedResult expectedResult = request.getResponseValidator().getExpectedResult();
+        if (expectedResult != null && expectedResultService.check(expectedResult, response)){
+            throw new AssertionError("actual result not equal expected. \n" +
+                    "-- Expected: " + expectedResult.getValue() +"\n" +
+                    "-- Actual  : " + expectedResultService.getValue(expectedResult, response));
+        }
     }
 
     private void checkResponseCode(Response response) {

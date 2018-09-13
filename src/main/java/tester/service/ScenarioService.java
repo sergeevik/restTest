@@ -3,6 +3,7 @@ package tester.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
 import org.apache.log4j.Logger;
+import tester.exeption.ExecuteFail;
 import tester.model.*;
 
 import java.io.IOException;
@@ -14,10 +15,12 @@ public class ScenarioService {
     private Properties properties;
     private HashMap<Integer, HashMap<String, Object>> values;
     private ElParser elParser;
+    private ExpectedResultService expectedResultService;
 
     public ScenarioService(Scenarios scenarios, Properties properties) {
         this.scenarios = scenarios;
         this.properties = properties;
+        this.expectedResultService = new ExpectedResultService();
         values = new HashMap<>();
         elParser = new ElParser();
     }
@@ -52,7 +55,6 @@ public class ScenarioService {
             int countRepeat = 0;
             do {
                 response = executeOnce(request);
-                actualValue = elParser.parseELInAnswer(repeatable.getKey(), response.jsonPath().get());
                 if (countRepeat++ > repeatable.getMaxRepeatCount()){
                     break;
                 }
@@ -63,12 +65,14 @@ public class ScenarioService {
                     log.info("sleep interrupted.");
                     log.warn(e.getMessage(), e);
                 }
-            } while (actualValue.equals(repeatable.getValue()) != repeatable.isEqual());
-            if (countRepeat >= repeatable.getMaxRepeatCount() &&
-                    actualValue.equals(repeatable.getValue()) != repeatable.isEqual()){
+            } while (!expectedResultService.check(repeatable.getExpectedResult(), response));
+            if (expectedResultService.check(repeatable.getExpectedResult(), response)){
+                actualValue = expectedResultService.getValue(repeatable.getExpectedResult(), response);
                 log.info("Запрос " + request.getRelativeUrl() + " повторился " + countRepeat + " раз. Но" +
                         " ожидаемый результат не получен. Ожидался результат\n" +
-                        "--- " + actualValue + " будет равно(" + repeatable.isEqual() + ") " + repeatable.getValue());
+                        "--- " + actualValue + " будет равно(" + repeatable.getExpectedResult().isEqual() + ") "
+                        + repeatable.getExpectedResult().getValue());
+                throw new ExecuteFail(request.getRelativeUrl());
             }
         }
         return response;

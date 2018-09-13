@@ -72,6 +72,23 @@
         "answerCode": {
           "type": "integer",
           "default": 200
+        },
+        "expectedResult":{
+          "$ref": "#definitions/expectedResult"
+        }
+      }
+    },
+    "expectedResult":{
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "equal": {
+          "type": "boolean"
+        },
+        "value": {
+          "type": "string"
         }
       }
     },
@@ -136,14 +153,8 @@
         "repeatableWhile":{
           "type": "object",
           "properties": {
-            "key": {
-              "type": "string"
-            },
-            "equal": {
-              "type": "boolean"
-            },
-            "value": {
-              "type": "string"
+            "expectedResult":{
+              "$ref": "#definitions/expectedResult"
             },
             "maxRepeatCount":{
               "type": "integer",
