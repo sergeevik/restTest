@@ -24,8 +24,7 @@ public class ResultLogger {
 
     public void printResultToLog(String headName){
         StringBuilder builder = new StringBuilder();
-        builder.append("\n")
-                .append(headName.toUpperCase())
+        builder.append(headName.toUpperCase())
                 .append(" RESULTS:\n");
         for (Map.Entry<String, Result> resultEntry : resultMap.entrySet()) {
             builder.append(resultEntry.getValue())
@@ -41,6 +40,10 @@ public class ResultLogger {
             }
         }
         log.info(builder.toString());
+    }
+
+    public void setOutFile(String outFile) {
+        this.outFile = outFile;
     }
 
     private enum Result{

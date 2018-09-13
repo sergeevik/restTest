@@ -47,6 +47,8 @@ public class Main {
         for (String scenarioFile : scenarioFiles) {
             scenario(commonProperties, scenarioFile);
         }
+        requestLogger.setOutFile(propertiesService.getFullPathToLogFile() + "resultRequest.log");
+        scenarioLogger.setOutFile(propertiesService.getFullPathToLogFile() + "resultScenario.log");
         requestLogger.printResultToLog("Requests");
         scenarioLogger.printResultToLog("Scenarios");
 

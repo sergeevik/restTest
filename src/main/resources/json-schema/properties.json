@@ -33,15 +33,6 @@
     },
     "fullPathToLogFile":{
       "type": "string"
-    },
-    "logLevel":{
-      "type": "string",
-      "enum": [
-        "INFO",
-        "DEBUG",
-        "WARN"
-      ],
-      "default": "INFO"
     }
   },
   "additionalProperties": true,

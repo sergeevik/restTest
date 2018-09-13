@@ -13,9 +13,11 @@ import java.util.Date;
 
 public class PropertiesService {
     private Properties properties;
+    private String fullPathToLogFile;
 
     public PropertiesService(Properties properties) {
         this.properties = properties;
+        setFullPathToLog();
     }
 
     public void setRestAssuredProperties(){
@@ -30,20 +32,31 @@ public class PropertiesService {
     }
 
     public void addLogAppender(){
+        appendLogWithLevel(fullPathToLogFile, Level.INFO);
+        appendLogWithLevel(fullPathToLogFile, Level.DEBUG);
+    }
+
+    private void appendLogWithLevel(String path, Level level) {
         FileAppender fileAppender = new FileAppender();
         fileAppender.setName("log");
-        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy/hh.mm.ss");
-        String fullPathToLogFile = properties.getFullPathToLogFile();
-        if (fullPathToLogFile == null || fullPathToLogFile.isEmpty()){
-            fullPathToLogFile = System.getProperty("user.home") + "/rest-tester";
-        }
-
-        String fileName = fullPathToLogFile + "/logs/" + format.format(new Date()) + ".log";
-        fileAppender.setFile(fileName);
-        fileAppender.setThreshold(Level.toLevel(properties.getLogLevel().name()));
+        fileAppender.setFile(path + level.toString() + ".log");
+        fileAppender.setThreshold(level);
         fileAppender.setAppend(true);
         fileAppender.setLayout(new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"));
         fileAppender.activateOptions();
         Logger.getRootLogger().addAppender(fileAppender);
+    }
+
+    private void setFullPathToLog(){
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy/HH-mm-ss/");
+        fullPathToLogFile = properties.getFullPathToLogFile();
+        if (fullPathToLogFile == null || fullPathToLogFile.isEmpty()){
+            fullPathToLogFile = System.getProperty("user.home") + "/rest-tester";
+        }
+        fullPathToLogFile = fullPathToLogFile + "/logs/" + format.format(new Date());
+    }
+
+    public String getFullPathToLogFile() {
+        return fullPathToLogFile;
     }
 }
