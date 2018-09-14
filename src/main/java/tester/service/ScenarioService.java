@@ -30,18 +30,21 @@ public class ScenarioService {
         for (Scenario scenario : scenarios.getScenarios()) {
             Request request = scenario.getRequest();
             Response response = executeWithRepeatable(scenario);
-
-            HashMap<String, Object> stepMap = values.getOrDefault(scenario.getStepId(), new HashMap<>());
-            if (request.getBody() != null && !request.getBody().isEmpty()) {
-                ObjectMapper mapper = new ObjectMapper();
-                HashMap hashMap = mapper.readValue(request.getBody(), HashMap.class);
-                stepMap.put("req", hashMap);
-            }
-            stepMap.put( "resp", response.jsonPath().get());
-            values.put(scenario.getStepId(), stepMap);
+            saveReqAndRespMap(scenario, request, response);
         }
 
         log.info("============= SCENARIO END =============");
+    }
+
+    private void saveReqAndRespMap(Scenario scenario, Request request, Response response) throws IOException {
+        HashMap<String, Object> stepMap = values.getOrDefault(scenario.getStepId(), new HashMap<>());
+        if (request.getBody() != null && !request.getBody().isEmpty()) {
+            ObjectMapper mapper = new ObjectMapper();
+            HashMap hashMap = mapper.readValue(request.getBody(), HashMap.class);
+            stepMap.put("req", hashMap);
+        }
+        stepMap.put( "resp", response.jsonPath().get());
+        values.put(scenario.getStepId(), stepMap);
     }
 
     private Response executeWithRepeatable(Scenario scenario) {
@@ -51,34 +54,49 @@ public class ScenarioService {
             response = executeOnce(request);
         }else {
             RepeatableWhile repeatable = scenario.getRepeatableWhile();
-            String actualValue;
             int countRepeat = 0;
             do {
                 response = executeOnce(request);
                 if (countRepeat++ > repeatable.getMaxRepeatCount()){
                     break;
                 }
-                try{
-                    log.info("sleep: " + repeatable.getSleep() + "ms.");
-                    Thread.sleep(repeatable.getSleep());
-                } catch (InterruptedException e) {
-                    log.info("sleep interrupted.");
-                    log.warn(e.getMessage(), e);
-                }
+                sleep(repeatable.getSleep());
             } while (!expectedResultService.check(repeatable.getExpectedResult(), response));
-            if (expectedResultService.check(repeatable.getExpectedResult(), response)){
-                actualValue = expectedResultService.getValue(repeatable.getExpectedResult(), response);
-                log.info("Запрос " + request.getRelativeUrl() + " повторился " + countRepeat + " раз. Но" +
-                        " ожидаемый результат не получен. Ожидался результат\n" +
-                        "--- " + actualValue + " будет равно(" + repeatable.getExpectedResult().isEqual() + ") "
-                        + repeatable.getExpectedResult().getValue());
-                throw new ExecuteFail(request.getRelativeUrl());
-            }
+            checkResult(scenario, response, countRepeat);
         }
         return response;
     }
 
+    private void checkResult(Scenario scenario, Response response, int countRepeat) {
+        RepeatableWhile repeatable = scenario.getRepeatableWhile();
+        Request request = scenario.getRequest();
+        if (expectedResultService.check(repeatable.getExpectedResult(), response)){
+            String actualValue = expectedResultService.getValue(repeatable.getExpectedResult(), response);
+            log.info("Запрос " + request.getRelativeUrl() + " повторился " + countRepeat + " раз. Но" +
+                    " ожидаемый результат не получен. Ожидался результат\n" +
+                    "--- " + actualValue + " будет равно(" + repeatable.getExpectedResult().isEqual() + ") "
+                    + repeatable.getExpectedResult().getValue());
+            throw new ExecuteFail(request.getRelativeUrl());
+        }
+    }
+
+    private void sleep(int ms) {
+        try{
+            log.info("sleep: " + ms + "ms.");
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            log.info("sleep interrupted.");
+            log.warn(e.getMessage(), e);
+        }
+    }
+
     private Response executeOnce(Request request) {
+        replaceEl(request);
+        RequestService requestService = new RequestService(request, properties);
+        return requestService.execute();
+    }
+
+    private void replaceEl(Request request) {
         if (values != null && !values.isEmpty()){
             request.setRelativeUrl(elParser.parseELByStepId(request.getRelativeUrl(), values) );
             request.setBody( elParser.parseELByStepId(request.getBody(), values) );
@@ -86,11 +104,7 @@ public class ScenarioService {
                 param.setValue( elParser.parseELByStepId(param.getValue(), values) );
             }
         }
-        RequestService requestService = new RequestService(request, properties);
-        return requestService.execute();
     }
-
-
 
 
 }

@@ -45,10 +45,7 @@ public class RequestService {
                     .log().all().filter(RequestLoggingFilter.logRequestTo(printStream))
                     .contentType(request.getContentType());
 
-            if (request.getBody() != null){
-                requestSpecification.body(request.getBody());
-            }
-
+            fillBody(requestSpecification);
             fillQueryParam(requestSpecification);
             fillHeaders(requestSpecification);
             fillContentType(requestSpecification);
@@ -58,7 +55,7 @@ public class RequestService {
             log.info("Response: \n" + response.prettyPrint());
 
             String schemaFullPath = getSchemaPath();
-            checkResposeEquasSceme(response, schemaFullPath);
+            checkResponseEqualsScheme(response, schemaFullPath);
             checkResponseCode(response);
             checkResponseHeaders(response);
             checkResult(response);
@@ -71,6 +68,12 @@ public class RequestService {
             log.info("====== END REQUEST: " + request.getRelativeUrl() + " ======");
         }
 
+    }
+
+    private void fillBody(RequestSpecification requestSpecification) {
+        if (request.getBody() != null){
+            requestSpecification.body(request.getBody());
+        }
     }
 
     private void checkResult(Response response) {
@@ -93,7 +96,7 @@ public class RequestService {
         }
     }
 
-    private void checkResposeEquasSceme(Response response, String schemaFullPath) {
+    private void checkResponseEqualsScheme(Response response, String schemaFullPath) {
         if (responseValidator.isValidateSchema() && response != null){
             response.then().assertThat()
                     .body(matchesJsonSchema(new File(schemaFullPath).toURI()));
