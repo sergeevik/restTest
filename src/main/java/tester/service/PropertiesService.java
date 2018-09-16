@@ -5,6 +5,7 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import tester.exeption.PropertiesConfigException;
 import tester.model.Auth;
 import tester.model.Properties;
 
@@ -20,7 +21,10 @@ public class PropertiesService {
         setFullPathToLog();
     }
 
-    public void setRestAssuredProperties(){
+    void setRestAssuredProperties(){
+        if (properties.getBaseUrl() == null || properties.getBaseUrl().isEmpty()){
+            throw new PropertiesConfigException("baseUrl is required. You value = " + properties.getBaseUrl());
+        }
         RestAssured.baseURI = properties.getBaseUrl();
         if (properties.getPort() > 0) {
             RestAssured.port = properties.getPort();
@@ -38,7 +42,7 @@ public class PropertiesService {
 
     private void appendLogWithLevel(String path, Level level) {
         FileAppender fileAppender = new FileAppender();
-        fileAppender.setName("log");
+        fileAppender.setName(level + ".log");
         fileAppender.setFile(path + level.toString() + ".log");
         fileAppender.setThreshold(level);
         fileAppender.setAppend(true);
