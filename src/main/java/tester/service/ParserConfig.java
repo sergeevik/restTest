@@ -26,6 +26,10 @@ public class ParserConfig {
         return scenarios;
     }
 
+    public static Scenarios getScenarios(String fileUrl) throws IOException {
+        return readValue(fileUrl, Scenarios.class);
+    }
+
     private static  <T> T readValue(String fileUrl, Class<T> tClass) throws IOException {
         File propertiesFile = new File(fileUrl);
         ObjectMapper mapper = new ObjectMapper();
