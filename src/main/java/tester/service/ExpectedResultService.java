@@ -6,7 +6,8 @@ import tester.model.ExpectedResult;
 import java.util.HashMap;
 
 public class ExpectedResultService {
-    ElParser parser = new ElParser();
+    private ElParser parser = new ElParser();
+
     public boolean check(ExpectedResult result, Response response){
         HashMap<String, Object> respMap = response.jsonPath().get();
         String key = result.getKey();
@@ -17,8 +18,7 @@ public class ExpectedResultService {
     public String getValue(ExpectedResult result, Response response){
         HashMap<String, Object> respMap = response.jsonPath().get();
         String key = result.getKey();
-        String actualValue = parser.parseELInAnswer(key, respMap);
-        return actualValue;
+        return parser.parseELInAnswer(key, respMap);
     }
 
 

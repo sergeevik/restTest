@@ -27,14 +27,11 @@ public class ElParser {
      * @return
      */
     String parseELByStepId(String text, HashMap<Integer, HashMap<String, Object>> values) {
+        log.debug("начинаем парсить строку: " + text);
         if (text == null || text.isEmpty()){
             return text;
         }
-        log.debug("начинаем парсить строку: " + text);
         String[] strings = StringUtils.substringsBetween(text, "#", "#");
-        if (strings == null){
-            return text;
-        }
         for (String string : strings) {
             String[] split = string.split("\\.");
             int stepId = Integer.parseInt(split[0]);
@@ -52,6 +49,7 @@ public class ElParser {
         return text;
     }
 
+    @SuppressWarnings("unchecked")
     private String parseEl(String[] text, HashMap<String, Object> map){
         for (String key : text) {
             Object value = map.get(key);
