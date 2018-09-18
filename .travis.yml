@@ -19,3 +19,5 @@ notifications:
   email:
     recipients:
       - sergeevviktor017@gmail.com
+    on_success: always
+    on_failure: always
