@@ -56,7 +56,7 @@
         },
         "validateSchema": {
           "type": "boolean",
-          "default": true
+          "default": false
         },
         "headers": {
           "type": "array",
