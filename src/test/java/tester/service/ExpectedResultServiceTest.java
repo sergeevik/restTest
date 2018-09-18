@@ -11,13 +11,14 @@ import java.util.HashMap;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @SuppressWarnings("unchecked")
 public class ExpectedResultServiceTest {
-    private static final String KEY = "key";
+    private static final String KEY = "#key#";
     private static final String VALUE = "value";
     private ExpectedResultService service;
     private ElParser mock;
@@ -84,7 +85,9 @@ public class ExpectedResultServiceTest {
     private Response responseMock() {
         Response respMock = mock(Response.class);
         JsonPath jsonPathMock = mock(JsonPath.class);
-        when(jsonPathMock.get()).thenReturn(new HashMap<>());
+        HashMap<Object, Object> map = new HashMap<>();
+        map.put("key", "value");
+        when(jsonPathMock.get()).thenReturn(map);
         when(respMock.jsonPath()).thenReturn(jsonPathMock);
         return respMock;
     }
@@ -116,5 +119,29 @@ public class ExpectedResultServiceTest {
 
         String value = service.getValue(expectedResult, respMock);
         assertNotEquals(VALUE, value);
+    }
+
+    @Test
+    public void containsInAnswer() {
+        ExpectedResult expectedResult = new ExpectedResult()
+                .withKey(KEY)
+                .withEqual(true)
+                .withValue(VALUE);
+        Response response = responseMock();
+        when(mock.parseELInAnswer(anyString(), any())).thenCallRealMethod();
+        boolean contains = service.containsInAnswer(expectedResult, response);
+        assertTrue(contains);
+    }
+
+    @Test
+    public void noContainsInAnswer() {
+        ExpectedResult expectedResult = new ExpectedResult()
+                .withKey("#NotKey#")
+                .withEqual(true)
+                .withValue(VALUE);
+        Response response = responseMock();
+        when(mock.parseELInAnswer(anyString(), any())).thenCallRealMethod();
+        boolean contains = service.containsInAnswer(expectedResult, response);
+        assertFalse(contains);
     }
 }
