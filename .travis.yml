@@ -14,3 +14,7 @@ after_success:
 branches:
   only:
   - master
+  
+  notifications:
+  email:
+    - sergeevviktor017@gmail.com
