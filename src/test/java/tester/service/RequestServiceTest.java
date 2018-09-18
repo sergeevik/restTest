@@ -20,6 +20,7 @@ import org.mockito.stubbing.Answer;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import tester.exeption.ExecuteFail;
+import tester.exeption.RequestFillException;
 import tester.model.*;
 import tester.model.Properties;
 
@@ -198,6 +199,21 @@ public class RequestServiceTest {
         requestService.fillContentType(mock);
         verify(mock, times(1)).contentType("prop json");
     }
+    @Test
+    public void fillContentTypeDefaultValue() {
+        Request request = new Request();
+        Properties properties = new Properties();
+        RequestService requestService = new RequestService(request, properties);
+        requestService.fillContentType(mock);
+        verify(mock, times(1)).contentType("application/json");
+    }
+    @Test(expected = RequestFillException.class)
+    public void fillContentTypeThrowExceptionWhenContentTypeEmpty() {
+        Request request = new Request().withContentType("");
+        Properties properties = new Properties().withContentType("");
+        RequestService requestService = new RequestService(request, properties);
+        requestService.fillContentType(mock);
+    }
 
     @Test
     public void executePost() {
@@ -313,22 +329,7 @@ public class RequestServiceTest {
                 .isNotNull()
                 .isEqualTo(parentPath + relativePath);
     }
-    @Test
-    public void testSchemaRelativePathInRequestEmptyAndParentEmptyThenReturnEmptyString() {
-        Request request = new Request()
-                .withResponseValidator(
-                        new ResponseValidator()
-                                .withSchemaRelativePath(null)
-                );
 
-        Properties properties = new Properties()
-                .withSchemaBaseUrl(null);
-        RequestService requestService = new RequestService(request, properties);
-        String schemaPath = requestService.getSchemaPath();
-        assertThat(schemaPath)
-                .isNotNull()
-                .isEmpty();
-    }
     @Test
     public void testSchemaPathEmptyWhenResponseValidatorNull() {
         Request request = new Request();

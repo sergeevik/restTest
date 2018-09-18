@@ -7,6 +7,7 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.log4j.Logger;
 import tester.exeption.ExecuteFail;
+import tester.exeption.RequestFillException;
 import tester.model.*;
 
 import java.io.ByteArrayOutputStream;
@@ -111,9 +112,9 @@ public class RequestService {
         if (responseValidator == null){
             return "";
         }
-        if (responseValidator.getSchemaFullPath() != null && !responseValidator.getSchemaFullPath().isEmpty()){
+        if (!responseValidator.getSchemaFullPath().isEmpty()){
             return responseValidator.getSchemaFullPath();
-        }else if (properties.getSchemaBaseUrl() != null && !properties.getSchemaBaseUrl().isEmpty()){
+        }else if (!properties.getSchemaBaseUrl().isEmpty()){
             return properties.getSchemaBaseUrl() + responseValidator.getSchemaRelativePath();
         }else {
             return "";
@@ -133,22 +134,20 @@ public class RequestService {
             requestSpecification.contentType(request.getContentType());
         }else if(!properties.getContentType().isEmpty()){
             requestSpecification.contentType(properties.getContentType());
+        }else {
+            throw new RequestFillException("content-type must be not empty in request or property file");
         }
     }
 
     void fillHeaders(RequestSpecification requestSpecification) {
-        if (request.getHeaders() != null){
-            for (Header header : request.getHeaders()) {
-                requestSpecification.header(header.getKey(), header.getValue());
-            }
+        for (Header header : request.getHeaders()) {
+            requestSpecification.header(header.getKey(), header.getValue());
         }
     }
 
     void fillQueryParam(RequestSpecification requestSpecification) {
-        if (request.getQueryParams() != null && !request.getQueryParams().isEmpty()){
-            for (QueryParam param : request.getQueryParams()) {
-                requestSpecification.queryParam(param.getKey(), param.getValue());
-            }
+        for (QueryParam param : request.getQueryParams()) {
+            requestSpecification.queryParam(param.getKey(), param.getValue());
         }
     }
 

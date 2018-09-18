@@ -3,7 +3,8 @@
   "type": "object",
   "properties": {
     "baseUrl": {
-      "type": "string"
+      "type": "string",
+      "default":""
     },
     "port": {
       "type": "integer",
@@ -17,7 +18,8 @@
       "default": "application/json"
     },
     "schemaBaseUrl": {
-      "type": "string"
+      "type": "string",
+      "default": ""
     },
     "requestsFolder": {
       "type": "string"
@@ -32,7 +34,8 @@
       "$ref": "common.json#definitions/listString"
     },
     "fullPathToLogFile":{
-      "type": "string"
+      "type": "string",
+      "default": ""
     }
   },
   "additionalProperties": true,

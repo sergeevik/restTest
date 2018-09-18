@@ -22,7 +22,7 @@ public class PropertiesService {
     }
 
     public void setRestAssuredProperties(){
-        if (properties.getBaseUrl() == null || properties.getBaseUrl().isEmpty()){
+        if (properties.getBaseUrl().isEmpty()){
             throw new PropertiesConfigException("baseUrl is required. You value = " + properties.getBaseUrl());
         }
         RestAssured.baseURI = properties.getBaseUrl();
@@ -54,7 +54,7 @@ public class PropertiesService {
     private void setFullPathToLog(){
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy/HH-mm-ss/");
         fullPathToLogFile = properties.getFullPathToLogFile();
-        if (fullPathToLogFile == null || fullPathToLogFile.isEmpty()){
+        if (fullPathToLogFile.isEmpty()){
             fullPathToLogFile = System.getProperty("user.home") + "/rest-tester";
         }
         fullPathToLogFile = fullPathToLogFile + "/logs/" + format.format(new Date());
