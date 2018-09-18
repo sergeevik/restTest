@@ -17,4 +17,5 @@ branches:
   
 notifications:
   email:
-    - sergeevviktor017@gmail.com
+    recipients:
+      - sergeevviktor017@gmail.com
