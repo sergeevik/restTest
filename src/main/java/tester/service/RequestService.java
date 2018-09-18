@@ -38,7 +38,9 @@ public class RequestService {
         try {
             log.info("====== START REQUEST: " + request.getRelativeUrl() + " ======");
             RequestSpecification requestSpecification = RestAssured.given()
-                    .log().all().filter(RequestLoggingFilter.logRequestTo(printStream));
+                    .log()
+                    .all()
+                    .filter(RequestLoggingFilter.logRequestTo(printStream));
 
             fillBody(requestSpecification);
             fillQueryParam(requestSpecification);
@@ -53,7 +55,7 @@ public class RequestService {
             checkResponseEqualsScheme(response, schemaFullPath);
             checkResponseCode(response);
             checkResponseHeaders(response);
-            checkResult(response);
+            checkExpectedResult(response);
             return response;
         }catch (AssertionError error){
             log.warn("====== FAIL REQUEST: " + request.getRelativeUrl() + " ======");
@@ -65,48 +67,60 @@ public class RequestService {
 
     }
 
-    private void fillBody(RequestSpecification requestSpecification) {
+    void fillBody(RequestSpecification requestSpecification) {
         if (request.getBody() != null){
             requestSpecification.body(request.getBody());
         }
     }
 
-    private void checkResult(Response response) {
+    void checkExpectedResult(Response response) {
         ExpectedResult expectedResult = request.getResponseValidator().getExpectedResult();
-        if (expectedResult != null && expectedResultService.check(expectedResult, response)){
+        if (expectedResult == null){
+            return;
+        }
+
+        if (!expectedResultService.containsInAnswer(expectedResult, response)){
+            throw new AssertionError("expected result key "+ expectedResult.getKey() + " not contains in response.");
+        }
+        if (!expectedResultService.check(expectedResult, response)){
             throw new AssertionError("actual result not equal expected. \n" +
                     "-- Expected: " + expectedResult.getValue() +"\n" +
                     "-- Actual  : " + expectedResultService.getValue(expectedResult, response));
         }
     }
 
-    private void checkResponseCode(Response response) {
+    void checkResponseCode(Response response) {
         response.then().assertThat()
                 .statusCode(request.getAnswerCode());
     }
-    private void checkResponseHeaders(Response response) {
+    void checkResponseHeaders(Response response) {
         ValidatableResponse validatableResponse = response.then().assertThat();
         for (Header header : responseValidator.getHeaders()) {
             validatableResponse.header(header.getKey(), header.getValue());
         }
     }
 
-    private void checkResponseEqualsScheme(Response response, String schemaFullPath) {
-        if (responseValidator.isValidateSchema() && response != null){
+    void checkResponseEqualsScheme(Response response, String schemaFullPath) {
+        if (responseValidator.isValidateSchema()){
             response.then().assertThat()
                     .body(matchesJsonSchema(new File(schemaFullPath).toURI()));
         }
     }
 
-    private String getSchemaPath() {
-        if (!responseValidator.getSchemaFullPath().isEmpty()){
+    String getSchemaPath() {
+        if (responseValidator == null){
+            return "";
+        }
+        if (responseValidator.getSchemaFullPath() != null && !responseValidator.getSchemaFullPath().isEmpty()){
             return responseValidator.getSchemaFullPath();
-        }else {
+        }else if (properties.getSchemaBaseUrl() != null && !properties.getSchemaBaseUrl().isEmpty()){
             return properties.getSchemaBaseUrl() + responseValidator.getSchemaRelativePath();
+        }else {
+            return "";
         }
     }
 
-    private Response executeRequest(RequestSpecification requestSpecification) {
+    Response executeRequest(RequestSpecification requestSpecification) {
         if (request.getRequestType() == Request.RequestType.GET){
             return requestSpecification.get(request.getRelativeUrl());
         }else{
@@ -114,7 +128,7 @@ public class RequestService {
         }
     }
 
-    private void fillContentType(RequestSpecification requestSpecification) {
+    void fillContentType(RequestSpecification requestSpecification) {
         if (!request.getContentType().isEmpty()){
             requestSpecification.contentType(request.getContentType());
         }else if(!properties.getContentType().isEmpty()){
@@ -122,7 +136,7 @@ public class RequestService {
         }
     }
 
-    private void fillHeaders(RequestSpecification requestSpecification) {
+    void fillHeaders(RequestSpecification requestSpecification) {
         if (request.getHeaders() != null){
             for (Header header : request.getHeaders()) {
                 requestSpecification.header(header.getKey(), header.getValue());
@@ -130,7 +144,7 @@ public class RequestService {
         }
     }
 
-    private void fillQueryParam(RequestSpecification requestSpecification) {
+    void fillQueryParam(RequestSpecification requestSpecification) {
         if (request.getQueryParams() != null && !request.getQueryParams().isEmpty()){
             for (QueryParam param : request.getQueryParams()) {
                 requestSpecification.queryParam(param.getKey(), param.getValue());
