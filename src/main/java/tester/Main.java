@@ -34,6 +34,7 @@ public class Main {
         Properties commonProperties = ParserConfig.getCommonProperties(propertiesFile);
         PropertiesService propertiesService = new PropertiesService(commonProperties);
         propertiesService.addLogAppender();
+        propertiesService.setRestAssuredProperties();
 
         List<String> requestsFiles = getAllFile(commonProperties.getRequestsFolder());
         requestsFiles.addAll(commonProperties.getRequestList());

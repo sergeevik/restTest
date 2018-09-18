@@ -36,14 +36,9 @@ public class RequestService {
 
     public Response execute() {
         try {
-
             log.info("====== START REQUEST: " + request.getRelativeUrl() + " ======");
-            PropertiesService propertiesService = new PropertiesService(properties);
-            propertiesService.setRestAssuredProperties();
-
             RequestSpecification requestSpecification = RestAssured.given()
-                    .log().all().filter(RequestLoggingFilter.logRequestTo(printStream))
-                    .contentType(request.getContentType());
+                    .log().all().filter(RequestLoggingFilter.logRequestTo(printStream));
 
             fillBody(requestSpecification);
             fillQueryParam(requestSpecification);

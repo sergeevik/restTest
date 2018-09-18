@@ -21,7 +21,7 @@ public class PropertiesService {
         setFullPathToLog();
     }
 
-    void setRestAssuredProperties(){
+    public void setRestAssuredProperties(){
         if (properties.getBaseUrl() == null || properties.getBaseUrl().isEmpty()){
             throw new PropertiesConfigException("baseUrl is required. You value = " + properties.getBaseUrl());
         }
