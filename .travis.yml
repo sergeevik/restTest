@@ -1,0 +1,16 @@
+# https://docs.travis-ci.com/user/languages/java/
+language: java
+jdk: oraclejdk8
+
+#https://dzone.com/articles/travis-ci-tutorial-java-projects
+cache:
+  directories:
+  - $HOME/.m2
+
+#https://github.com/codecov/example-java
+after_success:
+- bash <(curl -s https://codecov.io/bash) -t 1abfa41d-b698-4a56-915b-e080b1e3c89a
+
+branches:
+  only:
+  - master
