@@ -15,6 +15,6 @@ branches:
   only:
   - master
   
-  notifications:
+notifications:
   email:
     - sergeevviktor017@gmail.com
