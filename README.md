@@ -14,3 +14,4 @@ TODO:
     - /dd-MM-yyyy/hh-mm-ss/debug.log - логи DEBUG
     - /dd-MM-yyyy/hh-mm-ss/result.log  - логи результата
 - [ ] покрыть код тестами
+- [ ] пофиксить jacoco чтобы видел тесты с powerMock

@@ -57,7 +57,7 @@ public class ScenarioService {
             int countRepeat = 0;
             do {
                 response = executeOnce(request);
-                if (countRepeat++ > repeatable.getMaxRepeatCount()){
+                if (++countRepeat >= repeatable.getMaxRepeatCount()){
                     break;
                 }
                 sleep(repeatable.getSleep());
@@ -70,7 +70,7 @@ public class ScenarioService {
     private void checkResult(Scenario scenario, Response response, int countRepeat) {
         RepeatableWhile repeatable = scenario.getRepeatableWhile();
         Request request = scenario.getRequest();
-        if (expectedResultService.check(repeatable.getExpectedResult(), response)){
+        if (!expectedResultService.check(repeatable.getExpectedResult(), response)){
             String actualValue = expectedResultService.getValue(repeatable.getExpectedResult(), response);
             log.info("Запрос " + request.getRelativeUrl() + " повторился " + countRepeat + " раз. Но" +
                     " ожидаемый результат не получен. Ожидался результат\n" +
@@ -90,7 +90,7 @@ public class ScenarioService {
         }
     }
 
-    private Response executeOnce(Request request) {
+    Response executeOnce(Request request) {
         replaceEl(request);
         RequestService requestService = new RequestService(request, properties);
         return requestService.execute();
