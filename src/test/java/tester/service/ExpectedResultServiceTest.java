@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static tester.service.MockTemplate.mockResponse;
 
 @SuppressWarnings("unchecked")
 public class ExpectedResultServiceTest {
@@ -38,7 +39,7 @@ public class ExpectedResultServiceTest {
                 .withValue(VALUE);
         when(mock.parseELInAnswer(eq(KEY), any(HashMap.class)))
                 .thenReturn(VALUE);
-        Response respMock = responseMock();
+        Response respMock = mockResponse();
         boolean check = service.check(expectedResult, respMock);
         assertTrue(check);
     }
@@ -51,7 +52,7 @@ public class ExpectedResultServiceTest {
                 .withValue(VALUE);
         when(mock.parseELInAnswer(eq(KEY), any(HashMap.class)))
                 .thenReturn("not value");
-        Response respMock = responseMock();
+        Response respMock = mockResponse();
         boolean check = service.check(expectedResult, respMock);
         assertTrue(check);
     }
@@ -64,7 +65,7 @@ public class ExpectedResultServiceTest {
                 .withValue(VALUE);
         when(mock.parseELInAnswer(eq(KEY), any(HashMap.class)))
                 .thenReturn("not Equal");
-        Response respMock = responseMock();
+        Response respMock = mockResponse();
         boolean check = service.check(expectedResult, respMock);
         assertFalse(check);
     }
@@ -77,19 +78,9 @@ public class ExpectedResultServiceTest {
                 .withValue(VALUE);
         when(mock.parseELInAnswer(eq(KEY), any(HashMap.class)))
                 .thenReturn(VALUE);
-        Response respMock = responseMock();
+        Response respMock = mockResponse();
         boolean check = service.check(expectedResult, respMock);
         assertFalse(check);
-    }
-
-    private Response responseMock() {
-        Response respMock = mock(Response.class);
-        JsonPath jsonPathMock = mock(JsonPath.class);
-        HashMap<Object, Object> map = new HashMap<>();
-        map.put("key", "value");
-        when(jsonPathMock.get()).thenReturn(map);
-        when(respMock.jsonPath()).thenReturn(jsonPathMock);
-        return respMock;
     }
 
     @Test
@@ -101,7 +92,7 @@ public class ExpectedResultServiceTest {
 
         when(mock.parseELInAnswer(eq(KEY), any(HashMap.class)))
                 .thenReturn(VALUE);
-        Response respMock = responseMock();
+        Response respMock = mockResponse();
 
         String value = service.getValue(expectedResult, respMock);
         assertEquals(VALUE, value);
@@ -115,7 +106,7 @@ public class ExpectedResultServiceTest {
 
         when(mock.parseELInAnswer(eq(KEY), any(HashMap.class)))
                 .thenReturn("notEqualValue");
-        Response respMock = responseMock();
+        Response respMock = mockResponse();
 
         String value = service.getValue(expectedResult, respMock);
         assertNotEquals(VALUE, value);
@@ -127,7 +118,7 @@ public class ExpectedResultServiceTest {
                 .withKey(KEY)
                 .withEqual(true)
                 .withValue(VALUE);
-        Response response = responseMock();
+        Response response = mockResponse();
         when(mock.parseELInAnswer(anyString(), any())).thenCallRealMethod();
         boolean contains = service.containsInAnswer(expectedResult, response);
         assertTrue(contains);
@@ -139,7 +130,7 @@ public class ExpectedResultServiceTest {
                 .withKey("#NotKey#")
                 .withEqual(true)
                 .withValue(VALUE);
-        Response response = responseMock();
+        Response response = mockResponse();
         when(mock.parseELInAnswer(anyString(), any())).thenCallRealMethod();
         boolean contains = service.containsInAnswer(expectedResult, response);
         assertFalse(contains);

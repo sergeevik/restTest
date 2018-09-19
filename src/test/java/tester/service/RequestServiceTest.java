@@ -34,6 +34,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static tester.service.MockTemplate.mockResponse;
+import static tester.service.MockTemplate.mockValidateResponse;
 
 public class RequestServiceTest {
 
@@ -58,7 +60,7 @@ public class RequestServiceTest {
         RequestService requestService = new RequestService(request, new Properties());
         RequestService requestServiceSpy = spy(requestService);
         Response response = mockResponse();
-        ValidatableResponse validatableResponse = validateRespMock();
+        ValidatableResponse validatableResponse = mockValidateResponse();
         when(response.then()).thenReturn(validatableResponse);
         doReturn(response).when(requestServiceSpy).executeRequest(any(RequestSpecification.class));
         requestServiceSpy.execute();
@@ -345,7 +347,7 @@ public class RequestServiceTest {
     @Test
     public void testCheckResponseCodeDefault200() {
         Response response = mockResponse();
-        ValidatableResponse validatableResponse = validateRespMock();
+        ValidatableResponse validatableResponse = mockValidateResponse();
         when(response.then()).thenReturn(validatableResponse);
         RequestService requestService = new RequestService(new Request(), new Properties());
         requestService.checkResponseCode(response);
@@ -354,7 +356,7 @@ public class RequestServiceTest {
     @Test
     public void testCheckResponseCodeSetCustom() {
         Response response = mockResponse();
-        ValidatableResponse validatableResponse = validateRespMock();
+        ValidatableResponse validatableResponse = mockValidateResponse();
         when(response.then()).thenReturn(validatableResponse);
         Request request = new Request()
                 .withAnswerCode(1100);
@@ -367,7 +369,7 @@ public class RequestServiceTest {
     @Test
     public void testCheckSchemaWhenSchemaValidateFlagFalseByDefault() {
         Response response = mockResponse();
-        ValidatableResponse validatableResponse = validateRespMock();
+        ValidatableResponse validatableResponse = mockValidateResponse();
         when(response.then()).thenReturn(validatableResponse);
 
         Request request = new Request()
@@ -380,7 +382,7 @@ public class RequestServiceTest {
     @Test
     public void testCheckSchemaWhenSchemaValidateFlagTrue() {
         Response response = mockResponse();
-        ValidatableResponse validatableResponse = validateRespMock();
+        ValidatableResponse validatableResponse = mockValidateResponse();
         when(response.then()).thenReturn(validatableResponse);
 
         Request request = new Request()
@@ -399,7 +401,7 @@ public class RequestServiceTest {
                                 .withHeaders(headers)
                 );
         Response response = mockResponse();
-        ValidatableResponse validatableResponse = validateRespMock();
+        ValidatableResponse validatableResponse = mockValidateResponse();
         when(response.then()).thenReturn(validatableResponse);
 
         RequestService requestService = new RequestService(request, new Properties());
@@ -416,27 +418,11 @@ public class RequestServiceTest {
                                 .withHeaders(Collections.emptyList())
                 );
         Response response = mockResponse();
-        ValidatableResponse validatableResponse = validateRespMock();
+        ValidatableResponse validatableResponse = mockValidateResponse();
         when(response.then()).thenReturn(validatableResponse);
 
         RequestService requestService = new RequestService(request, new Properties());
         requestService.checkResponseHeaders(response);
             verify(validatableResponse, never()).header(anyString(), anyString());
-    }
-
-    private Response mockResponse() {
-        HashMap<Object, Object> map = new HashMap<>();
-        map.put("key", "value");
-        JsonPath jsonPathMock = mock(JsonPath.class);
-        when(jsonPathMock.get()).thenReturn(map);
-        Response mockResp = mock(Response.class);
-        when(mockResp.jsonPath()).thenReturn(jsonPathMock);
-        return mockResp;
-    }
-
-    private ValidatableResponse validateRespMock() {
-        ValidatableResponse validateRespMock = mock(ValidatableResponse.class);
-        when(validateRespMock.assertThat()).thenReturn(validateRespMock);
-        return validateRespMock;
     }
 }
