@@ -139,6 +139,10 @@
                 <configuration>
                     <excludes>
                         <exclude>**/model/*</exclude>
+                        <!--not need test logger-->
+                        <exclude>**/ResultLogger*</exclude>
+                        <!--jacoco not see coverage with PowerMock-->
+                        <exclude>**/ParserConfig*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
