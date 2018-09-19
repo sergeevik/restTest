@@ -1,30 +1,17 @@
 package tester.service;
 
-import io.restassured.RestAssured;
-import io.restassured.filter.Filter;
-import io.restassured.internal.RequestLogSpecificationImpl;
-import io.restassured.internal.RestAssuredResponseImpl;
-import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import org.apache.http.protocol.ResponseServer;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import tester.exeption.ExecuteFail;
-import tester.exeption.RequestFillException;
+import tester.exception.ExecuteFailException;
+import tester.exception.RequestFillException;
 import tester.model.*;
 import tester.model.Properties;
 
-import java.io.File;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -78,7 +65,7 @@ public class RequestServiceTest {
 
     }
 
-    @Test(expected = ExecuteFail.class)
+    @Test(expected = ExecuteFailException.class)
     public void executeFail() {
         Request request = new Request()
                 .withResponseValidator(

@@ -5,7 +5,7 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import tester.exeption.PropertiesConfigException;
+import tester.exception.PropertiesConfigException;
 import tester.model.Auth;
 import tester.model.Properties;
 

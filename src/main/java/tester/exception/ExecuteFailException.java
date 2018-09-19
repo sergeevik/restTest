@@ -1,8 +1,8 @@
-package tester.exeption;
+package tester.exception;
 
-public class ExecuteFail extends RuntimeException{
+public class ExecuteFailException extends RuntimeException{
     private String requestRelativeUrl;
-    public ExecuteFail(String relativeUrl) {
+    public ExecuteFailException(String relativeUrl) {
         requestRelativeUrl = relativeUrl;
     }
 

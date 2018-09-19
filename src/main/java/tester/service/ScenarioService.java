@@ -3,7 +3,7 @@ package tester.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
 import org.apache.log4j.Logger;
-import tester.exeption.ExecuteFail;
+import tester.exception.ExecuteFailException;
 import tester.model.*;
 
 import java.io.IOException;
@@ -76,7 +76,7 @@ public class ScenarioService {
                     " ожидаемый результат не получен. Ожидался результат\n" +
                     "--- " + actualValue + " будет равно(" + repeatable.getExpectedResult().isEqual() + ") "
                     + repeatable.getExpectedResult().getValue());
-            throw new ExecuteFail(request.getRelativeUrl());
+            throw new ExecuteFailException(request.getRelativeUrl());
         }
     }
 

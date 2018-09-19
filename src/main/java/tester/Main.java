@@ -1,6 +1,6 @@
 package tester;
 
-import tester.exeption.ExecuteFail;
+import tester.exception.ExecuteFailException;
 import tester.model.Properties;
 import tester.model.Request;
 import tester.model.Scenarios;
@@ -75,7 +75,7 @@ public class Main {
         try {
             scenarioService.execute();
             scenarioLogger.saveOk(scenarioFile);
-        }catch (ExecuteFail fail){
+        }catch (ExecuteFailException fail){
             scenarioLogger.saveFail(scenarioFile + ":" + fail.getRequestRelativeUrl());
         }
     }
@@ -86,7 +86,7 @@ public class Main {
         try {
             requestService.execute();
             requestLogger.saveOk(request.getRelativeUrl());
-        }catch (ExecuteFail fail){
+        }catch (ExecuteFailException fail){
             requestLogger.saveFail(request.getRelativeUrl());
         }
     }

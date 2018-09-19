@@ -6,8 +6,8 @@ import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.log4j.Logger;
-import tester.exeption.ExecuteFail;
-import tester.exeption.RequestFillException;
+import tester.exception.ExecuteFailException;
+import tester.exception.RequestFillException;
 import tester.model.*;
 
 import java.io.ByteArrayOutputStream;
@@ -61,7 +61,7 @@ public class RequestService {
         }catch (AssertionError error){
             log.warn("====== FAIL REQUEST: " + request.getRelativeUrl() + " ======");
             log.warn(error.getMessage());
-            throw new ExecuteFail(request.getRelativeUrl());
+            throw new ExecuteFailException(request.getRelativeUrl());
         }finally {
             log.info("====== END REQUEST: " + request.getRelativeUrl() + " ======");
         }
