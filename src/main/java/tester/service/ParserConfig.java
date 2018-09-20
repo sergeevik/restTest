@@ -12,6 +12,10 @@ import java.io.IOException;
 import java.util.Comparator;
 
 public class ParserConfig {
+
+    private ParserConfig() {
+    }
+
     public static Properties getCommonProperties(String fileUrl) throws IOException {
         return readValue(fileUrl, Properties.class);
     }
