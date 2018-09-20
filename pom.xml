@@ -194,6 +194,19 @@
                     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>1.4.2</version>
+                <configuration>
+                    <targetClasses>
+                        <param>tester.service.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>tester.service.*</param>
+                    </targetTests>
+                </configuration>
+            </plugin>
         </plugins>
 
         <resources>
