@@ -148,12 +148,12 @@
                 <version>${jacoco.version}</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/model/*</exclude>
-                        <!--not need test exception class-->
-                        <exclude>**/tester/exception/*</exclude>
                         <!--not need test logger-->
                         <exclude>**/ResultLogger*</exclude>
                     </excludes>
+                    <includes>
+                        <include>tester/service/*</include>
+                    </includes>
                 </configuration>
                 <executions>
                     <execution>
@@ -199,6 +199,9 @@
                 <artifactId>pitest-maven</artifactId>
                 <version>1.4.2</version>
                 <configuration>
+                    <excludedClasses>
+                        <excludedClass>tester.service.ResultLogger</excludedClass>
+                    </excludedClasses>
                     <targetClasses>
                         <param>tester.service.*</param>
                     </targetClasses>

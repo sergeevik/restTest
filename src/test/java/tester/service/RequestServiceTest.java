@@ -50,7 +50,10 @@ public class RequestServiceTest {
         ValidatableResponse validatableResponse = mockValidateResponse();
         when(response.then()).thenReturn(validatableResponse);
         doReturn(response).when(requestServiceSpy).executeRequest(any(RequestSpecification.class));
-        requestServiceSpy.execute();
+        Response execute = requestServiceSpy.execute();
+        assertThat(execute).isNotNull()
+                .isEqualTo(response)
+                .isSameAs(response);
 
         verify(requestServiceSpy, times(1)).fillBody(any(RequestSpecification.class));
         verify(requestServiceSpy, times(1)).fillContentType(any(RequestSpecification.class));

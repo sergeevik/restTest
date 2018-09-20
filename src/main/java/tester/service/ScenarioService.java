@@ -54,10 +54,10 @@ public class ScenarioService {
             response = executeOnce(request);
         }else {
             RepeatableWhile repeatable = scenario.getRepeatableWhile();
-            int countRepeat = 0;
+            int countRepeat = 1;
             do {
                 response = executeOnce(request);
-                if (++countRepeat >= repeatable.getMaxRepeatCount()){
+                if (++countRepeat > repeatable.getMaxRepeatCount()){
                     break;
                 }
                 sleep(repeatable.getSleep());
@@ -97,7 +97,7 @@ public class ScenarioService {
     }
 
     private void replaceEl(Request request) {
-        if (values != null && !values.isEmpty()){
+        if (!values.isEmpty()){
             request.setRelativeUrl(elParser.parseELByStepId(request.getRelativeUrl(), values) );
             request.setBody( elParser.parseELByStepId(request.getBody(), values) );
             for (QueryParam param : request.getQueryParams()) {
