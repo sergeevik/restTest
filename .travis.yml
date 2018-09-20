@@ -9,7 +9,7 @@ cache:
 
 #https://github.com/codecov/example-java
 after_success:
-- bash <(curl -s https://codecov.io/bash) -t 1abfa41d-b698-4a56-915b-e080b1e3c89a
+- bash <(curl -s https://codecov.io/bash) -t 1abfa41d-b698-4a56-915b-e080b1e3c89a -f "*/jacoco.exec"
 
 branches:
   only:
