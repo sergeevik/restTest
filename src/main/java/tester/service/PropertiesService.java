@@ -11,10 +11,14 @@ import tester.exception.PropertiesConfigException;
 import tester.model.Auth;
 import tester.model.Properties;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class PropertiesService {
+    private static Logger log = Logger.getLogger(PropertiesService.class);
     private Properties properties;
     private String fullPathToLogFile;
 
@@ -40,11 +44,25 @@ public class PropertiesService {
     }
 
     public void addLogAppender(){
-        appendLogWithLevel(fullPathToLogFile, Level.INFO);
-        appendLogWithLevel(fullPathToLogFile, Level.DEBUG);
+        try {
+            appendLogWithLevel(fullPathToLogFile, Level.INFO);
+            appendLogWithLevel(fullPathToLogFile, Level.DEBUG);
+        } catch (IOException e) {
+            if (!properties.getFullPathToLogFile().isEmpty()) {
+                log.error("ошибка создания файлов для логов по пути: " + fullPathToLogFile +
+                        ". Буду писать в user.home: " + System.getProperty("user.home"), e);
+                properties.setFullPathToLogFile("");
+                try {
+                    appendLogWithLevel(fullPathToLogFile, Level.INFO);
+                    appendLogWithLevel(fullPathToLogFile, Level.DEBUG);
+                } catch (IOException e1) {
+                    log.error("я сделал все, что мог, логи не получится писать даже в user.home", e1);
+                }
+            }
+        }
     }
 
-    private void appendLogWithLevel(String path, Level level) {
+    private void appendLogWithLevel(String path, Level level) throws IOException {
         FileAppender fileAppender = new FileAppender();
         fileAppender.setName(level + ".log");
         fileAppender.setFile(path + level.toString() + ".log");
@@ -52,6 +70,10 @@ public class PropertiesService {
         fileAppender.setAppend(true);
         fileAppender.setLayout(new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"));
         fileAppender.activateOptions();
+        String file = fileAppender.getFile();
+        if (Files.notExists(Paths.get(file))) {
+            Files.createFile(Paths.get(file));
+        }
         Logger.getRootLogger().addAppender(fileAppender);
     }
 
