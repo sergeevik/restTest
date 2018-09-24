@@ -3,6 +3,8 @@ package tester.service;
 import io.restassured.RestAssured;
 import io.restassured.authentication.AuthenticationScheme;
 import io.restassured.authentication.PreemptiveBasicAuthScheme;
+import io.restassured.specification.RequestSpecification;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
@@ -12,9 +14,11 @@ import tester.exception.PropertiesConfigException;
 import tester.model.Auth;
 import tester.model.Properties;
 
+import java.lang.reflect.Field;
 import java.util.Enumeration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class PropertiesServiceTest {
 
@@ -25,7 +29,7 @@ public class PropertiesServiceTest {
     private static final String FULL_PATH_TO_LOG_FILE = "full_path_to_log_file";
 
     @Test
-    public void testSetAllProperties() {
+    public void testSetAllProperties() throws IllegalAccessException {
         Properties properties = new Properties()
                 .withBaseUrl(BASE_URL)
                 .withPort(PORT)
@@ -33,8 +37,9 @@ public class PropertiesServiceTest {
         PropertiesService propertiesService = new PropertiesService(properties);
         propertiesService.setRestAssuredProperties();
 
-        assertThat(RestAssured.baseURI). isEqualTo(BASE_URL);
-        assertThat(RestAssured.port). isEqualTo(PORT);
+        RequestSpecification requestSpecification = RestAssured.requestSpecification;
+        assertThat(getFieldValue(requestSpecification, "baseUri")).isEqualTo(BASE_URL);
+        assertThat(getFieldValue(requestSpecification, "port", Integer.class)). isEqualTo(PORT);
         assertThat(RestAssured.authentication)
                 .isExactlyInstanceOf(PreemptiveBasicAuthScheme.class);
 
@@ -44,6 +49,16 @@ public class PropertiesServiceTest {
         assertThat(authentication.getPassword())
                 .isEqualTo(AUTH.getPassword());
     }
+
+    private <T> T getFieldValue(RequestSpecification requestSpecification, String fieldName, Class<T> cast) throws IllegalAccessException {
+        Field field = FieldUtils.getDeclaredField(requestSpecification.getClass(), fieldName, true);
+        Object value = FieldUtils.readField(field, requestSpecification, true);
+        return cast.cast(value);
+    }
+    private String getFieldValue(RequestSpecification requestSpecification, String fieldName) throws IllegalAccessException {
+        return getFieldValue(requestSpecification, fieldName, String.class);
+    }
+
     @Test(expected = PropertiesConfigException.class)
     public void testBaseUrlIsRequired() {
         Properties properties = new Properties()

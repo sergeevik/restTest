@@ -1,6 +1,8 @@
 package tester.service;
 
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.specification.RequestSpecification;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -22,17 +24,19 @@ public class PropertiesService {
     }
 
     public void setRestAssuredProperties(){
+        RequestSpecification specification = new RequestSpecBuilder().build();
         if (properties.getBaseUrl().isEmpty()){
             throw new PropertiesConfigException("baseUrl is required. You value = " + properties.getBaseUrl());
         }
-        RestAssured.baseURI = properties.getBaseUrl();
+        specification.baseUri(properties.getBaseUrl());
         if (properties.getPort() > 0) {
-            RestAssured.port = properties.getPort();
+            specification.port(properties.getPort());
         }
         Auth auth = properties.getAuth();
         if (auth != null) {
             RestAssured.authentication = RestAssured.preemptive().basic(auth.getLogin(), auth.getPassword());
         }
+        RestAssured.requestSpecification = specification;
     }
 
     public void addLogAppender(){

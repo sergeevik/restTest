@@ -53,12 +53,10 @@ public class ElParser {
     private String parseEl(String[] text, HashMap<String, Object> map){
         for (String key : text) {
             Object value = map.get(key);
-            if (value instanceof String){
-                return (String) value;
-            }else if (value instanceof HashMap){
+            if (value instanceof HashMap){
                 map = (HashMap<String, Object>) value;
-            }else {
-                throw new IllegalArgumentException("Ошибка парсинга выражения: " + Arrays.toString(text));
+            }else if (value != null){
+                return value.toString();
             }
         }
         throw new IllegalArgumentException("Ошибка парсинга выражения: " + Arrays.toString(text));
