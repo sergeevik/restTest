@@ -22,37 +22,41 @@ public class Main {
     private static ResultLogger requestLogger = new ResultLogger();
     private static ResultLogger scenarioLogger = new ResultLogger();
     public static void main(String[] args) throws IOException {
-        String propertiesFile;
-        if (args.length < 1 || args[0] == null || args[0].isEmpty()){
-            System.out.println("path to property file:");
-            Scanner scanner = new Scanner(System.in);
-            propertiesFile = scanner.nextLine();
-        }else {
-            propertiesFile = args[0];
+        try {
+            String propertiesFile;
+            if (args.length < 1 || args[0] == null || args[0].isEmpty()) {
+                System.out.println("path to property file:");
+                Scanner scanner = new Scanner(System.in);
+                propertiesFile = scanner.nextLine();
+            } else {
+                propertiesFile = args[0];
+            }
+
+            Properties commonProperties = ParserConfig.getCommonProperties(propertiesFile);
+            PropertiesService propertiesService = new PropertiesService(commonProperties);
+            propertiesService.addLogAppender();
+            propertiesService.setRestAssuredProperties();
+
+            List<String> requestsFiles = getAllFile(commonProperties.getRequestsFolder());
+            requestsFiles.addAll(commonProperties.getRequestList());
+
+            List<String> scenarioFiles = getAllFile(commonProperties.getScenariosFolder());
+            scenarioFiles.addAll(commonProperties.getScenarioList());
+
+            for (String requestFile : requestsFiles) {
+                req(commonProperties, requestFile);
+            }
+            for (String scenarioFile : scenarioFiles) {
+                scenario(commonProperties, scenarioFile);
+            }
+            requestLogger.setOutFile(propertiesService.getFullPathToLogFile() + "resultRequest.log");
+            scenarioLogger.setOutFile(propertiesService.getFullPathToLogFile() + "resultScenario.log");
+            requestLogger.printResultToLog("Requests");
+            scenarioLogger.printResultToLog("Scenarios");
+        }finally {
+            System.out.println("press any key and Enter");
+            new Scanner(System.in).nextLine();
         }
-
-        Properties commonProperties = ParserConfig.getCommonProperties(propertiesFile);
-        PropertiesService propertiesService = new PropertiesService(commonProperties);
-        propertiesService.addLogAppender();
-        propertiesService.setRestAssuredProperties();
-
-        List<String> requestsFiles = getAllFile(commonProperties.getRequestsFolder());
-        requestsFiles.addAll(commonProperties.getRequestList());
-
-        List<String> scenarioFiles = getAllFile(commonProperties.getScenariosFolder());
-        scenarioFiles.addAll(commonProperties.getScenarioList());
-
-        for (String requestFile : requestsFiles) {
-            req(commonProperties, requestFile);
-        }
-        for (String scenarioFile : scenarioFiles) {
-            scenario(commonProperties, scenarioFile);
-        }
-        requestLogger.setOutFile(propertiesService.getFullPathToLogFile() + "resultRequest.log");
-        scenarioLogger.setOutFile(propertiesService.getFullPathToLogFile() + "resultScenario.log");
-        requestLogger.printResultToLog("Requests");
-        scenarioLogger.printResultToLog("Scenarios");
-
 
     }
 
