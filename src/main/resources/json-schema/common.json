@@ -46,11 +46,7 @@
     "responseValidator":{
       "type": "object",
       "properties": {
-        "schemaRelativePath": {
-          "type": "string",
-          "default": ""
-        },
-        "schemaFullPath": {
+        "schemaPath": {
           "type": "string",
           "default": ""
         },

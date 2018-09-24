@@ -12,6 +12,7 @@ import tester.exception.RequestFillException;
 import tester.model.*;
 import tester.model.Properties;
 
+import java.net.URISyntaxException;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -287,12 +288,12 @@ public class RequestServiceTest {
     }
 
     @Test
-    public void testSchemaFullPathInRequest() {
+    public void testSchemaFullPathInRequest() throws URISyntaxException {
         String fullPath = "fullPath";
         Request request = new Request()
                 .withResponseValidator(
                         new ResponseValidator()
-                                .withSchemaFullPath(fullPath)
+                                .withSchemaPath(fullPath)
                 );
 
         RequestService requestService = new RequestService(request, new Properties());
@@ -310,11 +311,11 @@ public class RequestServiceTest {
         Request request = new Request()
                 .withResponseValidator(
                         new ResponseValidator()
-                                .withSchemaRelativePath(relativePath)
+                                .withSchemaPath(relativePath)
                 );
 
         Properties properties = new Properties()
-                .withSchemaBaseUrl(parentPath);
+                .withSchemaPath(parentPath);
         RequestService requestService = new RequestService(request, properties);
         String schemaPath = requestService.getSchemaPath();
         assertThat(schemaPath)

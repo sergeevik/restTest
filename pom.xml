@@ -98,7 +98,7 @@
 
                 <executions>
                     <execution>
-                        <id>ecm-jsonschema2opjo</id>
+                        <id>jsonschema2opjo</id>
                         <configuration>
                             <sourceDirectory>${project.basedir}/src/main/resources/json-schema/</sourceDirectory>
                             <targetPackage>tester.model</targetPackage>

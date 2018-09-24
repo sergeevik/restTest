@@ -13,6 +13,8 @@ import tester.model.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 
@@ -29,6 +31,9 @@ public class RequestService {
     public RequestService(Request request, Properties properties) {
         this.request = request;
         this.responseValidator = request.getResponseValidator();
+        if (responseValidator == null){
+            responseValidator = new ResponseValidator();
+        }
         this.properties = properties;
         this.expectedResultService = new ExpectedResultService();
         out = new ByteArrayOutputStream();
@@ -109,15 +114,19 @@ public class RequestService {
     }
 
     String getSchemaPath() {
-        if (responseValidator == null){
+        if (responseValidator.getSchemaPath().isEmpty()){
             return "";
         }
-        if (!responseValidator.getSchemaFullPath().isEmpty()){
-            return responseValidator.getSchemaFullPath();
-        }else if (!properties.getSchemaBaseUrl().isEmpty()){
-            return properties.getSchemaBaseUrl() + responseValidator.getSchemaRelativePath();
-        }else {
-            return "";
+        try {
+            URI uri = new URI(responseValidator.getSchemaPath());
+            if (uri.isAbsolute()){
+                return uri.getPath();
+            }else {
+                return properties.getSchemaPath() + responseValidator.getSchemaPath();
+            }
+        } catch (URISyntaxException e) {
+            log.warn("ошибка в пути до схемы: " + responseValidator.getSchemaPath());
+            throw new IllegalArgumentException(e);
         }
     }
 
