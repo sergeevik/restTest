@@ -122,10 +122,11 @@ public class RequestService {
     }
 
     Response executeRequest(RequestSpecification requestSpecification) {
+        String url = properties.getServerContextPath() + request.getRelativeUrl();
         if (request.getRequestType() == Request.RequestType.GET){
-            return requestSpecification.get(request.getRelativeUrl());
+            return requestSpecification.get(url);
         }else{
-            return requestSpecification.post(request.getRelativeUrl());
+            return requestSpecification.post(url);
         }
     }
 

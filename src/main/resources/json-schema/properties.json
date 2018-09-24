@@ -6,6 +6,10 @@
       "type": "string",
       "default":""
     },
+    "serverContextPath": {
+      "type": "string",
+      "default":""
+    },
     "port": {
       "type": "integer",
       "default": -1

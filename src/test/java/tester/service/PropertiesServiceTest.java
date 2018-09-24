@@ -18,11 +18,10 @@ import java.lang.reflect.Field;
 import java.util.Enumeration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 public class PropertiesServiceTest {
 
-    private static final String BASE_URL = "baseUrl";
+    private static final String BASE_URL = "http://baseUrl";
     private static final int PORT = 111;
     private static final Auth AUTH = new Auth("login", "pass");
     private static final int ZERO_PORT = 0;
