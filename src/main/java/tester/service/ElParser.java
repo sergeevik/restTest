@@ -32,6 +32,9 @@ public class ElParser {
             return text;
         }
         String[] strings = StringUtils.substringsBetween(text, "#", "#");
+        if (strings == null){
+            return text;
+        }
         for (String string : strings) {
             String[] split = string.split("\\.");
             int stepId = Integer.parseInt(split[0]);
