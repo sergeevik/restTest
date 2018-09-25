@@ -39,6 +39,14 @@ public class ElParserTest {
     }
 
     @Test
+    public void parseELByStepIdReturnTextIfNotContainElSymbol() {
+        HashMap<Integer, HashMap<String, Object>> values = new HashMap<>();
+        String abs = elParser.parseELByStepId("abs", values);
+        assertThat(abs).isNotNull()
+                .isEqualTo("abs");
+    }
+
+    @Test
     public void whenEmptyTextPassToParseELInAnswerThenReturnEmptyText() {
         String emptyText = "";
         String actualReturn = elParser.parseELInAnswer(emptyText, new HashMap<>());

@@ -64,7 +64,7 @@ public class PropertiesService {
         }
     }
 
-    private void appendLogWithLevel(String path, Level level) throws IOException {
+    void appendLogWithLevel(String path, Level level) throws IOException {
         FileAppender fileAppender = new FileAppender();
         fileAppender.setName(level + ".log");
         String fileName = path + level.toString() + ".log";

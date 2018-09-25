@@ -12,6 +12,7 @@ import tester.exception.RequestFillException;
 import tester.model.*;
 import tester.model.Properties;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
@@ -288,19 +289,23 @@ public class RequestServiceTest {
     }
 
     @Test
-    public void testSchemaFullPathInRequest(){
-        String fullPath = "fullPath";
+    public void testSchemaFullPathInRequest() throws URISyntaxException {
+        String fullPath = "C:/fullPath";
         Request request = new Request()
                 .withResponseValidator(
                         new ResponseValidator()
                                 .withSchemaPath(fullPath)
                 );
 
-        RequestService requestService = new RequestService(request, new Properties());
+        String propertiesPath = "propertiesPath";
+        Properties properties = new Properties().withSchemaPath(propertiesPath);
+
+        RequestService requestService = new RequestService(request, properties);
         String schemaPath = requestService.getSchemaPath();
         assertThat(schemaPath)
                 .isNotNull()
-                .isEqualTo(fullPath);
+                .isEqualTo(new URI(fullPath).getPath())
+                .doesNotContain(propertiesPath);
     }
     @Test(expected = IllegalArgumentException.class)
     public void testSchemaPathInRequestFail(){

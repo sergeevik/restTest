@@ -11,6 +11,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 import tester.exception.PropertiesConfigException;
 import tester.model.Auth;
 import tester.model.Properties;
@@ -25,6 +26,10 @@ import java.util.Comparator;
 import java.util.Enumeration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 public class PropertiesServiceTest {
 
@@ -130,6 +135,59 @@ public class PropertiesServiceTest {
         assertThat(countAfterSet - countBeforeSet).isEqualTo(fileAppenderLoggerCount);
         checkFileLogger(Level.INFO, rootLogger);
         checkFileLogger(Level.DEBUG, rootLogger);
+    }
+
+    @Test
+    public void appendLoggersTwiceInvokeAndWriteToUserHome() throws IOException {
+        Properties properties = new Properties().withFullPathToLogFile(FULL_PATH_TO_LOG_FILE);
+
+        PropertiesService propertiesService = Mockito.spy(new PropertiesService(properties));
+        doThrow(IOException.class)
+                .when(propertiesService)
+                .appendLogWithLevel(startsWith(FULL_PATH_TO_LOG_FILE), any(Level.class));
+        doNothing()
+                .when(propertiesService)
+                .appendLogWithLevel(startsWith(System.getProperty("user.home")), any(Level.class));
+
+        propertiesService.addLogAppender();
+
+        verify(propertiesService, times(1)).appendLogWithLevel(startsWith(FULL_PATH_TO_LOG_FILE), any(Level.class));
+        verify(propertiesService, times(2)).appendLogWithLevel(startsWith(System.getProperty("user.home")), any(Level.class));
+    }
+
+    @Test
+    public void appendLoggersTwiceInvokeAndNoWrite() throws IOException {
+        Properties properties = new Properties().withFullPathToLogFile(FULL_PATH_TO_LOG_FILE);
+
+        PropertiesService propertiesService = Mockito.spy(new PropertiesService(properties));
+        doThrow(IOException.class)
+                .when(propertiesService)
+                .appendLogWithLevel(startsWith(FULL_PATH_TO_LOG_FILE), any(Level.class));
+        doThrow(IOException.class)
+                .when(propertiesService)
+                .appendLogWithLevel(startsWith(System.getProperty("user.home")), any(Level.class));
+
+        propertiesService.addLogAppender();
+
+        verify(propertiesService, times(1)).appendLogWithLevel(startsWith(FULL_PATH_TO_LOG_FILE), any(Level.class));
+        verify(propertiesService, times(1)).appendLogWithLevel(startsWith(System.getProperty("user.home")), any(Level.class));
+    }
+
+    @Test
+    public void appendLoggersOnceInvokeIfPathEmpty() throws IOException {
+        PropertiesService propertiesService = Mockito.spy(new PropertiesService(new Properties()));
+        doThrow(IOException.class)
+                .when(propertiesService)
+                .appendLogWithLevel(eq(""), any(Level.class));
+        doThrow(IOException.class)
+                .when(propertiesService)
+                .appendLogWithLevel(startsWith(System.getProperty("user.home")), any(Level.class));
+
+        propertiesService.addLogAppender();
+
+        verify(propertiesService, times(1)).appendLogWithLevel(startsWith(System.getProperty("user.home")), any(Level.class));
+        verify(propertiesService, times(1)).addLogAppender();
+        verifyNoMoreInteractions(propertiesService);
     }
 
     private int countAppender(Enumeration allAppenders) {
