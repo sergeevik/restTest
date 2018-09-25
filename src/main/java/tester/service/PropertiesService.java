@@ -13,6 +13,7 @@ import tester.model.Properties;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -66,15 +67,17 @@ public class PropertiesService {
     private void appendLogWithLevel(String path, Level level) throws IOException {
         FileAppender fileAppender = new FileAppender();
         fileAppender.setName(level + ".log");
-        fileAppender.setFile(path + level.toString() + ".log");
+        String fileName = path + level.toString() + ".log";
+        Path pathToLog = Paths.get(fileName);
+        if (Files.notExists(pathToLog)) {
+            Files.createDirectories(pathToLog.getParent());
+            Files.createFile(pathToLog);
+        }
+        fileAppender.setFile(fileName);
         fileAppender.setThreshold(level);
         fileAppender.setAppend(true);
         fileAppender.setLayout(new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"));
         fileAppender.activateOptions();
-        String file = fileAppender.getFile();
-        if (Files.notExists(Paths.get(file))) {
-            Files.createFile(Paths.get(file));
-        }
         Logger.getRootLogger().addAppender(fileAppender);
     }
 
