@@ -53,6 +53,8 @@ public class Main {
             scenarioLogger.setOutFile(propertiesService.getFullPathToLogFile() + "resultScenario.log");
             requestLogger.printResultToLog("Requests");
             scenarioLogger.printResultToLog("Scenarios");
+        }catch (Exception ex){
+            ex.printStackTrace();
         }finally {
             System.out.println("press any key and Enter");
             new Scanner(System.in).nextLine();
