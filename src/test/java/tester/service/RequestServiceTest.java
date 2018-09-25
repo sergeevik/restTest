@@ -288,7 +288,7 @@ public class RequestServiceTest {
     }
 
     @Test
-    public void testSchemaFullPathInRequest() throws URISyntaxException {
+    public void testSchemaFullPathInRequest(){
         String fullPath = "fullPath";
         Request request = new Request()
                 .withResponseValidator(
@@ -301,6 +301,18 @@ public class RequestServiceTest {
         assertThat(schemaPath)
                 .isNotNull()
                 .isEqualTo(fullPath);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void testSchemaPathInRequestFail(){
+        String fullPath = "ht tp:// fail. com";
+        Request request = new Request()
+                .withResponseValidator(
+                        new ResponseValidator()
+                                .withSchemaPath(fullPath)
+                );
+
+        RequestService requestService = new RequestService(request, new Properties());
+        requestService.getSchemaPath();
     }
 
 

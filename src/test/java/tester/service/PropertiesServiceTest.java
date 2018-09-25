@@ -9,12 +9,19 @@ import org.apache.log4j.Appender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.AfterClass;
 import org.junit.Test;
 import tester.exception.PropertiesConfigException;
 import tester.model.Auth;
 import tester.model.Properties;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.Enumeration;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -143,5 +150,15 @@ public class PropertiesServiceTest {
                 .isEqualTo(level.toString());
         assertThat(fileAppender.getFile())
                 .endsWith(level + ".log");
+    }
+
+    @AfterClass
+    public static void removeLogFile() throws IOException {
+        if (Files.exists(Paths.get(FULL_PATH_TO_LOG_FILE))){
+            Files.walk(Paths.get(FULL_PATH_TO_LOG_FILE))
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        }
     }
 }

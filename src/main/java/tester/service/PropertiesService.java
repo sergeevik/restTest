@@ -52,6 +52,7 @@ public class PropertiesService {
                 log.error("ошибка создания файлов для логов по пути: " + fullPathToLogFile +
                         ". Буду писать в user.home: " + System.getProperty("user.home"), e);
                 properties.setFullPathToLogFile("");
+                setFullPathToLog();
                 try {
                     appendLogWithLevel(fullPathToLogFile, Level.INFO);
                     appendLogWithLevel(fullPathToLogFile, Level.DEBUG);
